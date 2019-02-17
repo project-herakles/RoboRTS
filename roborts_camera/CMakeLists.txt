@@ -76,12 +76,12 @@ add_executable(image_capture_test
   test/image_capture.cpp
 )
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" )
-target_link_libraries(image_capture_test
-  PRIVATE
-  driver::mercure
-)
-endif()
+# if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" )
+# target_link_libraries(image_capture_test
+#   PRIVATE
+#   driver::mercure
+# )
+# endif()
 
 target_link_libraries(image_capture_test
   PRIVATE
