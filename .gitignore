@@ -1,2 +1,8 @@
 *.pb.cc
 *.pb.h
+
+# macOS temporary files
+.DS_Store
+
+# VS Code configurations
+.vscode/
