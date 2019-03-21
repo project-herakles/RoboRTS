@@ -24,7 +24,8 @@
 #include <ostream>
 #include <Eigen/Dense>
 
-namespace roborts_localization {
+namespace roborts_localization
+{
 
 // Use eigen3 as base data structure
 using Vec3d = Eigen::Vector3d;

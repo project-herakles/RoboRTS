@@ -60,69 +60,98 @@
 #include <Eigen/Core>
 #include <g2o/stuff/misc.h>
 
-namespace roborts_local_planner {
+namespace roborts_local_planner
+{
 
-inline double PenaltyBoundToInterval(const double &var, const double &a, const double &epsilon) {
-  if (var < -a + epsilon) {
-    return (-var - (a - epsilon));
-  }
-  if (var <= a - epsilon) {
-    return 0.;
-  } else {
-    return (var - (a - epsilon));
-  }
+inline double PenaltyBoundToInterval(const double &var, const double &a, const double &epsilon)
+{
+    if (var < -a + epsilon)
+    {
+        return (-var - (a - epsilon));
+    }
+    if (var <= a - epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return (var - (a - epsilon));
+    }
 }
 
-inline double PenaltyBoundToInterval(const double &var, const double &a, const double &b, const double &epsilon) {
-  if (var < a + epsilon) {
-    return (-var + (a + epsilon));
-  }
-  if (var <= b - epsilon) {
-    return 0.;
-  } else {
-    return (var - (b - epsilon));
-  }
+inline double PenaltyBoundToInterval(const double &var, const double &a, const double &b, const double &epsilon)
+{
+    if (var < a + epsilon)
+    {
+        return (-var + (a + epsilon));
+    }
+    if (var <= b - epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return (var - (b - epsilon));
+    }
 }
 
-inline double PenaltyBoundFromBelow(const double &var, const double &a, const double &epsilon) {
-  if (var >= a + epsilon) {
-    return 0.;
-  } else {
-    return (-var + (a + epsilon));
-  }
+inline double PenaltyBoundFromBelow(const double &var, const double &a, const double &epsilon)
+{
+    if (var >= a + epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return (-var + (a + epsilon));
+    }
 }
 
-inline double PenaltyBoundToIntervalDerivative(const double &var, const double &a, const double &epsilon) {
-  if (var < -a + epsilon) {
-    return -1;
-  }
-  if (var <= a - epsilon) {
-    return 0.;
-  } else {
-    return 1;
-  }
+inline double PenaltyBoundToIntervalDerivative(const double &var, const double &a, const double &epsilon)
+{
+    if (var < -a + epsilon)
+    {
+        return -1;
+    }
+    if (var <= a - epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 inline double PenaltyBoundToIntervalDerivative(const double &var,
-                                               const double &a,
-                                               const double &b,
-                                               const double &epsilon) {
-  if (var < a + epsilon) {
-    return -1;
-  }
-  if (var <= b - epsilon) {
-    return 0.;
-  } else {
-    return 1;
-  }
+        const double &a,
+        const double &b,
+        const double &epsilon)
+{
+    if (var < a + epsilon)
+    {
+        return -1;
+    }
+    if (var <= b - epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
-inline double PenaltyBoundFromBelowDerivative(const double &var, const double &a, const double &epsilon) {
-  if (var >= a + epsilon) {
-    return 0.;
-  } else {
-    return -1;
-  }
+inline double PenaltyBoundFromBelowDerivative(const double &var, const double &a, const double &epsilon)
+{
+    if (var >= a + epsilon)
+    {
+        return 0.;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 } // namespace roborts_local_planner

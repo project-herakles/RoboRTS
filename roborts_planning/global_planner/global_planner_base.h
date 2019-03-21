@@ -21,23 +21,26 @@
 
 #include "costmap/costmap_interface.h"
 
-namespace roborts_global_planner{
+namespace roborts_global_planner
+{
 
-class GlobalPlannerBase {
- public:
-  typedef std::shared_ptr<roborts_costmap::CostmapInterface> CostmapPtr;
+class GlobalPlannerBase
+{
+public:
+    typedef std::shared_ptr<roborts_costmap::CostmapInterface> CostmapPtr;
 
-  GlobalPlannerBase(CostmapPtr costmap_ptr)
-      : costmap_ptr_(costmap_ptr) {
-  };
-  virtual ~GlobalPlannerBase() = default;
+    GlobalPlannerBase(CostmapPtr costmap_ptr)
+        : costmap_ptr_(costmap_ptr)
+    {
+    };
+    virtual ~GlobalPlannerBase() = default;
 
-  virtual roborts_common::ErrorInfo Plan(const geometry_msgs::PoseStamped &start,
-                                       const geometry_msgs::PoseStamped &goal,
-                                       std::vector<geometry_msgs::PoseStamped> &path) = 0;
+    virtual roborts_common::ErrorInfo Plan(const geometry_msgs::PoseStamped &start,
+                                           const geometry_msgs::PoseStamped &goal,
+                                           std::vector<geometry_msgs::PoseStamped> &path) = 0;
 
- protected:
-  CostmapPtr costmap_ptr_;
+protected:
+    CostmapPtr costmap_ptr_;
 };
 
 } //namespace roborts_global_planner

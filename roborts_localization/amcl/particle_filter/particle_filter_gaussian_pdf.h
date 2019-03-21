@@ -44,39 +44,41 @@
 #include "localization_math.h"
 #include "log.h"
 
-namespace roborts_localization {
+namespace roborts_localization
+{
 
 /**
  * @brief Gaussian pdf class
  */
-class ParticleFilterGaussianPdf {
+class ParticleFilterGaussianPdf
+{
 
- public:
-  /**
-   * @brief Default constructor
-   */
-  ParticleFilterGaussianPdf() = default;
-  /**
-   * @brief Create a gaussian pdf by mean and covariance
-   * @param mean Mean to initialize the gaussian pdf
-   * @param covariance Covariance initialize the gaussian pdf
-   */
-  ParticleFilterGaussianPdf(const Vec3d &mean, const Mat3d &covariance);
+public:
+    /**
+     * @brief Default constructor
+     */
+    ParticleFilterGaussianPdf() = default;
+    /**
+     * @brief Create a gaussian pdf by mean and covariance
+     * @param mean Mean to initialize the gaussian pdf
+     * @param covariance Covariance initialize the gaussian pdf
+     */
+    ParticleFilterGaussianPdf(const Vec3d &mean, const Mat3d &covariance);
 
-  /**
-   * @brief Generate random pose particle sample
-   * @return Return the random pose particle sample
-   */
-  Vec3d GenerateSample();
+    /**
+     * @brief Generate random pose particle sample
+     * @return Return the random pose particle sample
+     */
+    Vec3d GenerateSample();
 
- private:
+private:
 
-  Vec3d mean_;
-  Mat3d covariance_;
+    Vec3d mean_;
+    Mat3d covariance_;
 
-  // Decomposed covariance matrix (rotation * diagonal)
-  Mat3d covariance_rotation_;
-  Vec3d covariance_diagonal_;
+    // Decomposed covariance matrix (rotation * diagonal)
+    Mat3d covariance_rotation_;
+    Vec3d covariance_diagonal_;
 
 };
 

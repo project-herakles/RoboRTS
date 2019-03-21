@@ -69,51 +69,54 @@
 #include "observation_buffer.h"
 #include "map_common.h"
 
-namespace roborts_costmap {
+namespace roborts_costmap
+{
 
-class ObstacleLayer : public CostmapLayer {
- public:
-  ObstacleLayer() {
-    costmap_ = nullptr;
-  }
+class ObstacleLayer : public CostmapLayer
+{
+public:
+    ObstacleLayer()
+    {
+        costmap_ = nullptr;
+    }
 
-  virtual ~ObstacleLayer() {}
-  virtual void OnInitialize();
-  virtual void Activate();
-  virtual void Deactivate();
-  virtual void Reset();
-  virtual void UpdateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j);
-  virtual void UpdateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
-                            double *max_x, double *max_y) override;
-  void LaserScanCallback(const sensor_msgs::LaserScanConstPtr &message,
-                         const std::shared_ptr<ObservationBuffer> &buffer);
-  void LaserScanValidInfoCallback(const sensor_msgs::LaserScanConstPtr &message,
-                                  const std::shared_ptr<ObservationBuffer> &buffer);
+    virtual ~ObstacleLayer() {}
+    virtual void OnInitialize();
+    virtual void Activate();
+    virtual void Deactivate();
+    virtual void Reset();
+    virtual void UpdateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j);
+    virtual void UpdateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
+                              double *max_x, double *max_y) override;
+    void LaserScanCallback(const sensor_msgs::LaserScanConstPtr &message,
+                           const std::shared_ptr<ObservationBuffer> &buffer);
+    void LaserScanValidInfoCallback(const sensor_msgs::LaserScanConstPtr &message,
+                                    const std::shared_ptr<ObservationBuffer> &buffer);
 
- protected:
-  bool GetMarkingObservations(std::vector<Observation> &marking_observations) const;
-  bool GetClearingObservations(std::vector<Observation> &clearing_observations) const;
-  virtual void RaytraceFreespace(const Observation &clearing_observation, double *min_x, double *min_y,
-                                 double *max_x, double *max_y);
-  void UpdateRaytraceBounds(double ox, double oy, double wx, double wy, double range, double *min_x, double *min_y,
-                            double *max_x, double *max_y);
-  void UpdateFootprint(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
-                       double *max_x, double *max_y);
-  bool footprint_clearing_enabled_, rolling_window_;
-  int combination_method_;
-  std::string global_frame_;
-  double max_obstacle_height_;
-  std::vector<geometry_msgs::Point> transformed_footprint_;
-  laser_geometry::LaserProjection projector_;
+protected:
+    bool GetMarkingObservations(std::vector<Observation> &marking_observations) const;
+    bool GetClearingObservations(std::vector<Observation> &clearing_observations) const;
+    virtual void RaytraceFreespace(const Observation &clearing_observation, double *min_x, double *min_y,
+                                   double *max_x, double *max_y);
+    void UpdateRaytraceBounds(double ox, double oy, double wx, double wy, double range, double *min_x, double *min_y,
+                              double *max_x, double *max_y);
+    void UpdateFootprint(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
+                         double *max_x, double *max_y);
+    bool footprint_clearing_enabled_, rolling_window_;
+    int combination_method_;
+    std::string global_frame_;
+    double max_obstacle_height_;
+    std::vector<geometry_msgs::Point> transformed_footprint_;
+    laser_geometry::LaserProjection projector_;
 
-  std::vector<std::shared_ptr<message_filters::SubscriberBase> > observation_subscribers_;
-  std::vector<std::shared_ptr<tf::MessageFilterBase> > observation_notifiers_;
-  std::vector<std::shared_ptr<ObservationBuffer> > observation_buffers_;
-  std::vector<std::shared_ptr<ObservationBuffer> > marking_buffers_;
-  std::vector<std::shared_ptr<ObservationBuffer> > clearing_buffers_;
+    std::vector<std::shared_ptr<message_filters::SubscriberBase> > observation_subscribers_;
+    std::vector<std::shared_ptr<tf::MessageFilterBase> > observation_notifiers_;
+    std::vector<std::shared_ptr<ObservationBuffer> > observation_buffers_;
+    std::vector<std::shared_ptr<ObservationBuffer> > marking_buffers_;
+    std::vector<std::shared_ptr<ObservationBuffer> > clearing_buffers_;
 
-  std::vector<Observation> static_clearing_observations_, static_marking_observations_;
-  std::chrono::system_clock::time_point reset_time_;
+    std::vector<Observation> static_clearing_observations_, static_marking_observations_;
+    std::chrono::system_clock::time_point reset_time_;
 };
 
 } //namespace roborts_costmap

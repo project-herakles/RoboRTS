@@ -42,70 +42,74 @@
 #include "../particle_filter/particle_filter.h"
 #include "localization_math.h"
 
-namespace roborts_localization{
+namespace roborts_localization
+{
 
-enum OdomModel{
-  ODOM_MODEL_DIFF = 0,
-  ODOM_MODEL_OMNI = 1
+enum OdomModel
+{
+    ODOM_MODEL_DIFF = 0,
+    ODOM_MODEL_OMNI = 1
 };
 
 
-class SensorOdomData{
- public:
-  Vec3d pose;
-  Vec3d delta;
+class SensorOdomData
+{
+public:
+    Vec3d pose;
+    Vec3d delta;
 };
 
-class SensorOdom {
- public:
-  /**
-   * @brief Default constructor
-   */
-  SensorOdom(double alpha1,
-             double alpha2,
-             double alpha3,
-             double alpha4,
-             double alpha5);
+class SensorOdom
+{
+public:
+    /**
+     * @brief Default constructor
+     */
+    SensorOdom(double alpha1,
+               double alpha2,
+               double alpha3,
+               double alpha4,
+               double alpha5);
 
-  /**
-   * @brief Set odometry model to omni model.
-   * @param alpha1
-   * @param alpha2
-   * @param alpha3
-   * @param alpha4
-   * @param alpha5
-   */
-  void SetModelOmni(double alpha1,
-                    double alpha2,
-                    double alpha3,
-                    double alpha4,
-                    double alpha5);
+    /**
+     * @brief Set odometry model to omni model.
+     * @param alpha1
+     * @param alpha2
+     * @param alpha3
+     * @param alpha4
+     * @param alpha5
+     */
+    void SetModelOmni(double alpha1,
+                      double alpha2,
+                      double alpha3,
+                      double alpha4,
+                      double alpha5);
 
-  /**
-   * @brief Update the filter based on the action model
-   * @param pf_ptr Particle filter object pointer
-   * @param sensor_data_ptr Sensor data object pointer
-   * @return Returns true if the filter has been updated
-   */
-  bool UpdateAction(SampleSetPtr pf_sample_set_ptr,
-                    const SensorOdomData &odom_data);
+    /**
+     * @brief Update the filter based on the action model
+     * @param pf_ptr Particle filter object pointer
+     * @param sensor_data_ptr Sensor data object pointer
+     * @return Returns true if the filter has been updated
+     */
+    bool UpdateAction(SampleSetPtr pf_sample_set_ptr,
+                      const SensorOdomData &odom_data);
 
- private:
+private:
 
-  /**
-   * @brief Current data timestamp
-   */
-  double time_;
+    /**
+     * @brief Current data timestamp
+     */
+    double time_;
 
-  /**
-   * @brief Model type
-   */
-  OdomModel odom_model_type_;
+    /**
+     * @brief Model type
+     */
+    OdomModel odom_model_type_;
 
-  /**
-   * @brief Drift parameters
-   */
-  double alpha1_, alpha2_, alpha3_, alpha4_, alpha5_;
+    /**
+     * @brief Drift parameters
+     */
+    double alpha1_, alpha2_, alpha3_, alpha4_, alpha5_;
 };
 
 }// roborts_localization

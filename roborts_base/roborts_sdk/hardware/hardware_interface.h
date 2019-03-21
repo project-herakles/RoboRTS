@@ -18,18 +18,20 @@
 #ifndef ROBORTS_SDK_HARDWARE_INTERFACE_H
 #define ROBORTS_SDK_HARDWARE_INTERFACE_H
 
-namespace roborts_sdk{
+namespace roborts_sdk
+{
 /**
  * @brief Abstract class for hardware as an interface
  */
-class HardwareInterface{
- public:
-  HardwareInterface(){};
-  virtual ~HardwareInterface() = default;
- protected:
-  virtual bool Init() = 0;
-  virtual int Read(uint8_t *buf, int len) = 0;
-  virtual int Write(const uint8_t *buf, int len) = 0;
+class HardwareInterface
+{
+public:
+    HardwareInterface() {};
+    virtual ~HardwareInterface() = default;
+protected:
+    virtual bool Init() = 0;
+    virtual int Read(uint8_t *buf, int len) = 0;
+    virtual int Write(const uint8_t *buf, int len) = 0;
 };
 }
 #endif //ROBORTS_SDK_HARDWARE_INTERFACE_H

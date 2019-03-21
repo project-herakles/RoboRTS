@@ -58,7 +58,8 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
 
-namespace roborts_costmap {
+namespace roborts_costmap
+{
 
 /**
  * @brief Calculate the extreme distances for the footprint
@@ -148,7 +149,7 @@ std::vector<geometry_msgs::Point> MakeFootprintFromParams(ros::NodeHandle& nh);
  * which the footprint_xmlrpc value came.  It is used only for
  * reporting errors. */
 std::vector<geometry_msgs::Point> MakeFootprintFromXMLRPC(XmlRpc::XmlRpcValue& footprint_xmlrpc,
-                                const std::string& full_param_name);
+        const std::string& full_param_name);
 
 /** @brief Write the current unpadded_footprint_ to the "footprint"
  * parameter of the given NodeHandle so that dynamic_reconfigure

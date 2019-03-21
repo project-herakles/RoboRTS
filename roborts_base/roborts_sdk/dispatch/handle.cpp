@@ -17,37 +17,47 @@
 
 #include "handle.h"
 
-namespace roborts_sdk {
-Handle::Handle(std::string serial_port) {
-  device_ = std::make_shared<SerialDevice>(serial_port, 921600);
-  protocol_ = std::make_shared<Protocol>(device_);
+namespace roborts_sdk
+{
+Handle::Handle(std::string serial_port)
+{
+    device_ = std::make_shared<SerialDevice>(serial_port, 921600);
+    protocol_ = std::make_shared<Protocol>(device_);
 
 }
-bool Handle::Init(){
-  if (!device_->Init()) {
-    LOG_ERROR<<"Can not open device. ";
-    return false;
-  }
-  if (!protocol_->Init()) {
-    LOG_ERROR<<"Protocol initialization failed.";
-    return false;
-  }
-  return true;
+bool Handle::Init()
+{
+    if (!device_->Init())
+    {
+        LOG_ERROR<<"Can not open device. ";
+        return false;
+    }
+    if (!protocol_->Init())
+    {
+        LOG_ERROR<<"Protocol initialization failed.";
+        return false;
+    }
+    return true;
 }
-std::shared_ptr<Protocol> Handle::GetProtocol() {
-  return protocol_;
+std::shared_ptr<Protocol> Handle::GetProtocol()
+{
+    return protocol_;
 }
 
-void Handle::Spin() {
-  executor_ = std::make_shared<Executor>(shared_from_this());
-  for (auto sub :subscription_factory_) {
-    executor_->ExecuteSubscription(sub);
-  }
-  for (auto client :client_factory_) {
-    executor_->ExecuteClient(client);
-  }
-  for (auto service :service_factory_) {
-    executor_->ExecuteService(service);
-  }
+void Handle::Spin()
+{
+    executor_ = std::make_shared<Executor>(shared_from_this());
+    for (auto sub :subscription_factory_)
+    {
+        executor_->ExecuteSubscription(sub);
+    }
+    for (auto client :client_factory_)
+    {
+        executor_->ExecuteClient(client);
+    }
+    for (auto service :service_factory_)
+    {
+        executor_->ExecuteService(service);
+    }
 }
 }

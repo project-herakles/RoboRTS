@@ -29,32 +29,32 @@ struct make_int_sequence<0, Is...>
 
 template<class R, class U, class... Args, int... Is>
 auto bind_this_sub(R (U::*p)(Args...), U * pp, int_sequence<Is...>)
--> decltype(std::bind(p, pp, std::placeholder_template<Is>{}...))
+-> decltype(std::bind(p, pp, std::placeholder_template<Is> {} ...))
 {
-  return std::bind(p, pp, std::placeholder_template<Is>{}...);
+    return std::bind(p, pp, std::placeholder_template<Is> {}...);
 }
 
 // binds a member function only for the this pointer using std::bind
 template<class R, class U, class... Args>
 auto bind_this(R (U::*p)(Args...), U * pp)
--> decltype(bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) >{}))
+-> decltype(bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) > {}))
 {
-  return bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) >{});
+    return bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) > {});
 }
 
 // utility
 template<class R, class U, class... Args, int... Is>
 auto bind_this_sub(R (U::*p)(Args...) const, U * pp, int_sequence<Is...>)
--> decltype(std::bind(p, pp, std::placeholder_template<Is>{}...))
+-> decltype(std::bind(p, pp, std::placeholder_template<Is> {} ...))
 {
-  return std::bind(p, pp, std::placeholder_template<Is>{}...);
+    return std::bind(p, pp, std::placeholder_template<Is> {}...);
 }
 
 // binds a member function only for the this pointer using std::bind
 template<class R, class U, class... Args>
 auto bind_this(R (U::*p)(Args...) const, U * pp)
--> decltype(bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) >{}))
+-> decltype(bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) > {}))
 {
-  return bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) >{});
+    return bind_this_sub(p, pp, make_int_sequence< sizeof...(Args) > {});
 }
 #endif //RRTS_BIND_THIS_H

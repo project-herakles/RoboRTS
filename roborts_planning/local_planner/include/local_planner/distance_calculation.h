@@ -59,7 +59,8 @@
 #include <Eigen/Core>
 #include "local_planner/utility_tool.h"
 
-namespace roborts_local_planner {
+namespace roborts_local_planner
+{
 
 /**
  * @brief This file is a distance calculator
@@ -76,24 +77,29 @@ typedef std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> >
  * @return Closest point on line
  */
 inline Eigen::Vector2d ClosestPointOnLineSegment2D(const Eigen::Ref<const Eigen::Vector2d> &point,
-                                                        const Eigen::Ref<const Eigen::Vector2d> &line_start,
-                                                        const Eigen::Ref<const Eigen::Vector2d> &line_end) {
-  Eigen::Vector2d diff = line_end - line_start;
-  double sq_norm = diff.squaredNorm();
+        const Eigen::Ref<const Eigen::Vector2d> &line_start,
+        const Eigen::Ref<const Eigen::Vector2d> &line_end)
+{
+    Eigen::Vector2d diff = line_end - line_start;
+    double sq_norm = diff.squaredNorm();
 
-  if (sq_norm == 0){
-    return line_start;
-  }
+    if (sq_norm == 0)
+    {
+        return line_start;
+    }
 
-  double u = ((point.x() - line_start.x()) * diff.x() + (point.y() - line_start.y()) * diff.y()) / sq_norm;
+    double u = ((point.x() - line_start.x()) * diff.x() + (point.y() - line_start.y()) * diff.y()) / sq_norm;
 
-  if (u <= 0) {
-    return line_start;
-  } else if (u >= 1) {
-    return line_end;
-  }
+    if (u <= 0)
+    {
+        return line_start;
+    }
+    else if (u >= 1)
+    {
+        return line_end;
+    }
 
-  return line_start + u * diff;
+    return line_start + u * diff;
 }
 
 /**
@@ -105,9 +111,10 @@ inline Eigen::Vector2d ClosestPointOnLineSegment2D(const Eigen::Ref<const Eigen:
  */
 
 inline double DistancePointToSegment2D(const Eigen::Ref<const Eigen::Vector2d> &point,
-                                           const Eigen::Ref<const Eigen::Vector2d> &line_start,
-                                           const Eigen::Ref<const Eigen::Vector2d> &line_end) {
-  return (point - ClosestPointOnLineSegment2D(point, line_start, line_end)).norm();
+                                       const Eigen::Ref<const Eigen::Vector2d> &line_start,
+                                       const Eigen::Ref<const Eigen::Vector2d> &line_end)
+{
+    return (point - ClosestPointOnLineSegment2D(point, line_start, line_end)).norm();
 }
 
 /**
@@ -120,42 +127,48 @@ inline double DistancePointToSegment2D(const Eigen::Ref<const Eigen::Vector2d> &
  * @return If true intersection, else not intersection
  */
 inline bool CheckLineSegmentsIntersection2D(const Eigen::Ref<const Eigen::Vector2d> &line1_start,
-                                                const Eigen::Ref<const Eigen::Vector2d> &line1_end,
-                                                const Eigen::Ref<const Eigen::Vector2d> &line2_start,
-                                                const Eigen::Ref<const Eigen::Vector2d> &line2_end,
-                                                Eigen::Vector2d *intersection = NULL) {
-  double s_numer, t_numer, denom, t;
-  Eigen::Vector2d line1 = line1_end - line1_start;
-  Eigen::Vector2d line2 = line2_end - line2_start;
+        const Eigen::Ref<const Eigen::Vector2d> &line1_end,
+        const Eigen::Ref<const Eigen::Vector2d> &line2_start,
+        const Eigen::Ref<const Eigen::Vector2d> &line2_end,
+        Eigen::Vector2d *intersection = NULL)
+{
+    double s_numer, t_numer, denom, t;
+    Eigen::Vector2d line1 = line1_end - line1_start;
+    Eigen::Vector2d line2 = line2_end - line2_start;
 
-  denom = line1.x() * line2.y() - line2.x() * line1.y();
-  if (denom == 0) {
-    return false;
-  }
-  bool denomPositive = denom > 0;
+    denom = line1.x() * line2.y() - line2.x() * line1.y();
+    if (denom == 0)
+    {
+        return false;
+    }
+    bool denomPositive = denom > 0;
 
-  Eigen::Vector2d aux = line1_start - line2_start;
+    Eigen::Vector2d aux = line1_start - line2_start;
 
-  s_numer = line1.x() * aux.y() - line1.y() * aux.x();
-  if ((s_numer < 0) == denomPositive) {
-    return false;
-  }
+    s_numer = line1.x() * aux.y() - line1.y() * aux.x();
+    if ((s_numer < 0) == denomPositive)
+    {
+        return false;
+    }
 
-  t_numer = line2.x() * aux.y() - line2.y() * aux.x();
-  if ((t_numer < 0) == denomPositive) {
-    return false;
-  }
+    t_numer = line2.x() * aux.y() - line2.y() * aux.x();
+    if ((t_numer < 0) == denomPositive)
+    {
+        return false;
+    }
 
-  if (((s_numer > denom) == denomPositive) || ((t_numer > denom) == denomPositive)) {
-    return false;
-  }
+    if (((s_numer > denom) == denomPositive) || ((t_numer > denom) == denomPositive))
+    {
+        return false;
+    }
 
-  t = t_numer / denom;
-  if (intersection) {
-    *intersection = line1_start + t * line1;
-  }
+    t = t_numer / denom;
+    if (intersection)
+    {
+        *intersection = line1_start + t * line1;
+    }
 
-  return true;
+    return true;
 }
 
 /**
@@ -168,22 +181,24 @@ inline bool CheckLineSegmentsIntersection2D(const Eigen::Ref<const Eigen::Vector
  */
 
 inline double DistanceSegmentToSegment2D(const Eigen::Ref<const Eigen::Vector2d> &line1_start,
-                                             const Eigen::Ref<const Eigen::Vector2d> &line1_end,
-                                             const Eigen::Ref<const Eigen::Vector2d> &line2_start,
-                                             const Eigen::Ref<const Eigen::Vector2d> &line2_end) {
+        const Eigen::Ref<const Eigen::Vector2d> &line1_end,
+        const Eigen::Ref<const Eigen::Vector2d> &line2_start,
+        const Eigen::Ref<const Eigen::Vector2d> &line2_end)
+{
 
-  if (CheckLineSegmentsIntersection2D(line1_start, line1_end, line2_start, line2_end)){
-    return 0;
-  }
+    if (CheckLineSegmentsIntersection2D(line1_start, line1_end, line2_start, line2_end))
+    {
+        return 0;
+    }
 
-  std::array<double, 4> distances;
+    std::array<double, 4> distances;
 
-  distances[0] = DistancePointToSegment2D(line1_start, line2_start, line2_end);
-  distances[1] = DistancePointToSegment2D(line1_end, line2_start, line2_end);
-  distances[2] = DistancePointToSegment2D(line2_start, line1_start, line1_end);
-  distances[3] = DistancePointToSegment2D(line2_end, line1_start, line1_end);
+    distances[0] = DistancePointToSegment2D(line1_start, line2_start, line2_end);
+    distances[1] = DistancePointToSegment2D(line1_end, line2_start, line2_end);
+    distances[2] = DistancePointToSegment2D(line2_start, line1_start, line1_end);
+    distances[3] = DistancePointToSegment2D(line2_end, line1_start, line1_end);
 
-  return *std::min_element(distances.begin(), distances.end());
+    return *std::min_element(distances.begin(), distances.end());
 }
 
 /**
@@ -192,33 +207,37 @@ inline double DistanceSegmentToSegment2D(const Eigen::Ref<const Eigen::Vector2d>
  * @param vertices 2D polygon's vertices
  * @return distance of point to 2D polygon
  */
-inline double DistancePointToPolygon2D(const Eigen::Vector2d &point, const Point2dContainer &vertices) {
-  double dist = HUGE_VAL;
+inline double DistancePointToPolygon2D(const Eigen::Vector2d &point, const Point2dContainer &vertices)
+{
+    double dist = HUGE_VAL;
 
-  if (vertices.size() == 1) {
-    return (point - vertices.front()).norm();
-  }
-
-  for (int i = 0; i < (int) vertices.size() - 1; ++i) {
-
-    double new_dist = PointToLineDistance(point.coeffRef(0), point.coeffRef(1), vertices.at(i).coeffRef(0), vertices.at(i).coeffRef(1),
-                                          vertices.at(i + 1).coeffRef(0), vertices.at(i + 1).coeffRef(1));
-    if (new_dist < dist) {
-      dist = new_dist;
+    if (vertices.size() == 1)
+    {
+        return (point - vertices.front()).norm();
     }
 
-  }
+    for (int i = 0; i < (int) vertices.size() - 1; ++i)
+    {
 
-  /*if (vertices.size() > 2) {
-    double new_dist = PointToLineDistance(point.coeffRef(0), point.coeffRef(1), vertices.back().coeffRef(0), vertices.back().coeffRef(1),
-                                          vertices.front().coeffRef(0), vertices.front().coeffRef(1));
-    if (new_dist < dist) {
-      std::cout << "here" << std::endl;
-      dist = new_dist;
+        double new_dist = PointToLineDistance(point.coeffRef(0), point.coeffRef(1), vertices.at(i).coeffRef(0), vertices.at(i).coeffRef(1),
+                                              vertices.at(i + 1).coeffRef(0), vertices.at(i + 1).coeffRef(1));
+        if (new_dist < dist)
+        {
+            dist = new_dist;
+        }
+
     }
-  }*/
 
-  return dist;
+    /*if (vertices.size() > 2) {
+      double new_dist = PointToLineDistance(point.coeffRef(0), point.coeffRef(1), vertices.back().coeffRef(0), vertices.back().coeffRef(1),
+                                            vertices.front().coeffRef(0), vertices.front().coeffRef(1));
+      if (new_dist < dist) {
+        std::cout << "here" << std::endl;
+        dist = new_dist;
+      }
+    }*/
+
+    return dist;
 }
 
 /**
@@ -229,29 +248,34 @@ inline double DistancePointToPolygon2D(const Eigen::Vector2d &point, const Point
  * @return distance of 2D line segment to 2D polygon
  */
 inline double DistanceSegmentToPolygon2D(const Eigen::Vector2d &line_start,
-                                             const Eigen::Vector2d &line_end,
-                                             const Point2dContainer &vertices) {
-  double dist = HUGE_VAL;
+        const Eigen::Vector2d &line_end,
+        const Point2dContainer &vertices)
+{
+    double dist = HUGE_VAL;
 
-  if (vertices.size() == 1) {
-    return DistancePointToSegment2D(vertices.front(), line_start, line_end);
-  }
-
-  for (int i = 0; i < (int) vertices.size() - 1; ++i) {
-    double new_dist = DistanceSegmentToSegment2D(line_start, line_end, vertices.at(i), vertices.at(i + 1));
-    if (new_dist < dist) {
-      dist = new_dist;
+    if (vertices.size() == 1)
+    {
+        return DistancePointToSegment2D(vertices.front(), line_start, line_end);
     }
-  }
 
-  if (vertices.size() > 2) {
-    double new_dist =
-        DistanceSegmentToSegment2D(line_start, line_end, vertices.back(), vertices.front());
-    if (new_dist < dist)
-      return new_dist;
-  }
+    for (int i = 0; i < (int) vertices.size() - 1; ++i)
+    {
+        double new_dist = DistanceSegmentToSegment2D(line_start, line_end, vertices.at(i), vertices.at(i + 1));
+        if (new_dist < dist)
+        {
+            dist = new_dist;
+        }
+    }
 
-  return dist;
+    if (vertices.size() > 2)
+    {
+        double new_dist =
+            DistanceSegmentToSegment2D(line_start, line_end, vertices.back(), vertices.front());
+        if (new_dist < dist)
+            return new_dist;
+    }
+
+    return dist;
 }
 
 /**
@@ -260,28 +284,34 @@ inline double DistanceSegmentToPolygon2D(const Eigen::Vector2d &line_start,
  * @param vertices2 Vertices of second 2D polygon's vertices
  * @return distance of two 2D polygons
  */
-inline double DistancePolygonToPolygon2D(const Point2dContainer &vertices1, const Point2dContainer &vertices2) {
-  double dist = HUGE_VAL;
+inline double DistancePolygonToPolygon2D(const Point2dContainer &vertices1, const Point2dContainer &vertices2)
+{
+    double dist = HUGE_VAL;
 
-  if (vertices1.size() == 1) {
-    return DistancePointToPolygon2D(vertices1.front(), vertices2);
-  }
-
-  for (int i = 0; i < (int) vertices1.size() - 1; ++i) {
-    double new_dist = DistanceSegmentToPolygon2D(vertices1[i], vertices1[i + 1], vertices2);
-    if (new_dist < dist) {
-      dist = new_dist;
+    if (vertices1.size() == 1)
+    {
+        return DistancePointToPolygon2D(vertices1.front(), vertices2);
     }
-  }
 
-  if (vertices1.size() > 2) {
-    double new_dist = DistanceSegmentToPolygon2D(vertices1.back(), vertices1.front(), vertices2);
-    if (new_dist < dist) {
-      return new_dist;
+    for (int i = 0; i < (int) vertices1.size() - 1; ++i)
+    {
+        double new_dist = DistanceSegmentToPolygon2D(vertices1[i], vertices1[i + 1], vertices2);
+        if (new_dist < dist)
+        {
+            dist = new_dist;
+        }
     }
-  }
 
-  return dist;
+    if (vertices1.size() > 2)
+    {
+        double new_dist = DistanceSegmentToPolygon2D(vertices1.back(), vertices1.front(), vertices2);
+        if (new_dist < dist)
+        {
+            return new_dist;
+        }
+    }
+
+    return dist;
 }
 
 
