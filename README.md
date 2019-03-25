@@ -1,6 +1,15 @@
 # RoboRTS
-[![Build Status](https://travis-ci.org/RoboMaster/RoboRTS.svg?branch=master)](https://travis-ci.org/RoboMaster/RoboRTS)
-[![Gitter](https://badges.gitter.im/RoboMaster/RoboRTS.svg)](https://gitter.im/RoboMaster/RoboRTS?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+## Start-up Procedure
+
+In workspace, 
+
+```bash
+roslaunch roborts_bringup base.launch
+rosrun roborts_camera roborts_camera_node
+rosrun roborts_detection armor_detection_node
+rosrun roborts_detection armor_detection_client
+```
 
 ## Introduction
 
