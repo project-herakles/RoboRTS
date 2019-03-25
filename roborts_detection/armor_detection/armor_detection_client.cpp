@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         std::cin >> command;
         if (command != '1' && command != '2' && command != '3' && command != '4')
         {
-            std::cout << "please inpugain!" << std::endl;
+            std::cout << "please input again!" << std::endl;
             std::cout << "> ";
             std::cin >> command;
         }
