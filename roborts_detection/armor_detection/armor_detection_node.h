@@ -40,81 +40,79 @@
 #include "armor_detection_algorithms.h"
 #include "gimbal_control.h"
 
-namespace roborts_detection
-{
+namespace roborts_detection {
 
 using roborts_common::NodeState;
 using roborts_common::ErrorInfo;
 
-class ArmorDetectionNode
-{
-public:
-    explicit ArmorDetectionNode();
-    /**
-     * @brief Initializing armor detection algorithm.
-     * @return Return the error information.
-     */
-    ErrorInfo Init();
-    /**
-     * @brief Actionlib server call back function.
-     * @param data Command for control the algorithm thread.
-     */
-    void ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstPtr &data);
-    /**
-     * @brief Starting the armor detection thread.
-     */
-    void StartThread();
-    /**
-     * @brief Pausing the armor detection thread when received command 2 in action_lib callback function.
-     */
-    void PauseThread();
-    /**
-     * @brief Stopping armor detection thread.
-     */
-    void StopThread();
-    /**
-     * @brief Executing the armor detection algorithm.
-     */
-    void ExecuteLoop();
-    /**
-     * @brief Publishing enemy pose information that been calculated by the armor detection algorithm.
-     */
-    void PublishMsgs();
-    ~ArmorDetectionNode();
-protected:
-private:
-    std::shared_ptr<ArmorDetectionBase> armor_detector_;
-    std::thread armor_detection_thread_;
-    unsigned int max_rotating_fps_;
-    unsigned int min_rotating_detected_count_;
-    unsigned int undetected_armor_delay_;
+class ArmorDetectionNode {
+ public:
+  explicit ArmorDetectionNode();
+  /**
+   * @brief Initializing armor detection algorithm.
+   * @return Return the error information.
+   */
+  ErrorInfo Init();
+  /**
+   * @brief Actionlib server call back function.
+   * @param data Command for control the algorithm thread.
+   */
+  void ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstPtr &data);
+  /**
+   * @brief Starting the armor detection thread.
+   */
+  void StartThread();
+  /**
+   * @brief Pausing the armor detection thread when received command 2 in action_lib callback function.
+   */
+  void PauseThread();
+  /**
+   * @brief Stopping armor detection thread.
+   */
+  void StopThread();
+  /**
+   * @brief Executing the armor detection algorithm.
+   */
+  void ExecuteLoop();
+  /**
+   * @brief Publishing enemy pose information that been calculated by the armor detection algorithm.
+   */
+  void PublishMsgs();
+  ~ArmorDetectionNode();
+ protected:
+ private:
+  std::shared_ptr<ArmorDetectionBase> armor_detector_;
+  std::thread armor_detection_thread_;
+  unsigned int max_rotating_fps_;
+  unsigned int min_rotating_detected_count_;
+  unsigned int undetected_armor_delay_;
 
-    //! state and error
-    NodeState node_state_;
-    ErrorInfo error_info_;
-    bool initialized_;
-    bool running_;
-    std::mutex mutex_;
-    std::condition_variable condition_var_;
-    unsigned int undetected_count_;
+  //! state and error
+  NodeState node_state_;
+  ErrorInfo error_info_;
+  bool initialized_;
+  bool running_;
+  std::mutex mutex_;
+  std::condition_variable condition_var_;
+  unsigned int undetected_count_;
 
-    //! enemy information
-    double x_;
-    double y_;
-    double z_;
-    bool detected_enemy_;
-    unsigned long demensions_;
+  //! enemy information
+  double x_;
+  double y_;
+  double z_;
+  bool detected_enemy_;
+  unsigned long demensions_;
 
-    //ROS
-    ros::NodeHandle nh_;
-    ros::NodeHandle enemy_nh_;
-    ros::Publisher enemy_info_pub_;
-    std::shared_ptr<CVToolbox> cv_toolbox_;
-    actionlib::SimpleActionServer<roborts_msgs::ArmorDetectionAction> as_;
-    roborts_msgs::GimbalAngle gimbal_angle_;
+  //ROS
+  ros::NodeHandle nh_;
+  ros::NodeHandle enemy_nh_;
+  ros::Publisher enemy_info_pub_;
+  std::shared_ptr<CVToolbox> cv_toolbox_;
+  actionlib::SimpleActionServer<roborts_msgs::ArmorDetectionAction> as_;
+  roborts_msgs::GimbalAngle gimbal_angle_;
 
-    //! control model
-    GimbalContrl gimbal_control_;
+  //! control model
+  GimbalContrl gimbal_control_;
 };
 } //namespace roborts_detection
 

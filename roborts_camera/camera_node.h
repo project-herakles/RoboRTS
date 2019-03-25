@@ -33,47 +33,45 @@
 #include "alg_factory/algorithm_factory.h"
 #include "io/io.h"
 
-namespace roborts_camera
-{
+namespace roborts_camera{
 
-class CameraNode
-{
-public:
-    /**
-     * @brief Construcor of camera node
-     * @details Read the camera parameter, create the camera drivers based on camera factory
-     * and start all camera threads for update images.
-     */
-    explicit CameraNode();
-    /**
-     * @brief Start all the threads for camera drivers to update and publish the image data
-     */
-    void StartThread();
-    /**
-     * @brief Invoke each camera driver to read the image data and publish using ROS image_transport with corresponding parameter
-     */
-    void Update(const unsigned int camera_num_);
-    /**
-    * @brief Stop to read image.
-    */
-    void StoptThread();
-    ~CameraNode();
-private:
-    //! drivers of different cameras inherited from camera base
-    std::vector<std::shared_ptr<CameraBase>> camera_driver_;
-    //! camera parameters
-    CameraParam camera_param_;
-    //! number of cameras
-    unsigned long camera_num_;
-    //! flag of running
-    bool running_;
-    //! threads of different cameras
-    std::vector<std::thread> camera_threads_;
+class CameraNode{
+ public:
+  /**
+   * @brief Construcor of camera node
+   * @details Read the camera parameter, create the camera drivers based on camera factory
+   * and start all camera threads for update images.
+   */
+  explicit CameraNode();
+  /**
+   * @brief Start all the threads for camera drivers to update and publish the image data
+   */
+  void StartThread();
+  /**
+   * @brief Invoke each camera driver to read the image data and publish using ROS image_transport with corresponding parameter
+   */
+  void Update(const unsigned int camera_num_);
+  /**
+ * @brief Stop to read image.
+ */
+  void StoptThread();
+  ~CameraNode();
+ private:
+  //! drivers of different cameras inherited from camera base
+  std::vector<std::shared_ptr<CameraBase>> camera_driver_;
+  //! camera parameters
+  CameraParam camera_param_;
+  //! number of cameras
+  unsigned long camera_num_;
+  //! flag of running
+  bool running_;
+  //! threads of different cameras
+  std::vector<std::thread> camera_threads_;
 
-    //! ROS node handlers of different cameras
-    std::vector<ros::NodeHandle> nhs_;
-    //! ROS image transport camera publisher to publish image data
-    std::vector<image_transport::CameraPublisher> img_pubs_;
+  //! ROS node handlers of different cameras
+  std::vector<ros::NodeHandle> nhs_;
+  //! ROS image transport camera publisher to publish image data
+  std::vector<image_transport::CameraPublisher> img_pubs_;
 
 };
 } //namespace roborts_camera

@@ -93,8 +93,7 @@
 #include "timed_elastic_band/proto/timed_elastic_band.pb.h"
 
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 
 typedef g2o::BlockSolver< g2o::BlockSolverTraits<-1, -1> >  TebBlockSolver;
 typedef g2o::LinearSolverCSparse<TebBlockSolver::PoseMatrixType> TebLinearSolver;
@@ -102,176 +101,163 @@ typedef std::vector< Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> 
 /**
  * @brief See optimal_base.h
  */
-class TebOptimal : public OptimalBase
-{
-public:
+class TebOptimal : public OptimalBase {
+ public:
 
-    TebOptimal();
+  TebOptimal();
 
-    TebOptimal (const Config& config_param, ObstContainer* obstacles = NULL,
-                RobotFootprintModelPtr robot_model = boost::make_shared<PointRobotFootprint>(),
-                LocalVisualizationPtr visual = LocalVisualizationPtr(),const ViaPointContainer* via_points = NULL);
+  TebOptimal (const Config& config_param, ObstContainer* obstacles = NULL,
+              RobotFootprintModelPtr robot_model = boost::make_shared<PointRobotFootprint>(),
+              LocalVisualizationPtr visual = LocalVisualizationPtr(),const ViaPointContainer* via_points = NULL);
 
-    ~TebOptimal()
-    {
+  ~TebOptimal() {
 
-    }
+  }
 
-    void initialize(const Config& config_param, ObstContainer* obstacles = NULL,
-                    RobotFootprintModelPtr robot_model = boost::make_shared<PointRobotFootprint>(),
-                    LocalVisualizationPtr visual = LocalVisualizationPtr(),const ViaPointContainer* via_points = NULL);
+  void initialize(const Config& config_param, ObstContainer* obstacles = NULL,
+                  RobotFootprintModelPtr robot_model = boost::make_shared<PointRobotFootprint>(),
+                  LocalVisualizationPtr visual = LocalVisualizationPtr(),const ViaPointContainer* via_points = NULL);
 
-    bool Optimal(std::vector<DataBase>& initial_plan, const geometry_msgs::Twist* start_vel = NULL,
-                 bool free_goal_vel = false, bool micro_control = false) override;
+  bool Optimal(std::vector<DataBase>& initial_plan, const geometry_msgs::Twist* start_vel = NULL,
+               bool free_goal_vel = false, bool micro_control = false) override;
 
-    bool Optimal(const DataBase& start, const DataBase& goal, const geometry_msgs::Twist* start_vel = NULL,
-                 bool free_goal_vel=false, bool micro_control = false) override;
+  bool Optimal(const DataBase& start, const DataBase& goal, const geometry_msgs::Twist* start_vel = NULL,
+               bool free_goal_vel=false, bool micro_control = false) override;
 
-    bool GetVelocity(roborts_common::ErrorInfo &error_info, double& vx, double& vy, double& omega,
-                     double& acc_x, double& acc_y, double& acc_omega) const override ;
+  bool GetVelocity(roborts_common::ErrorInfo &error_info, double& vx, double& vy, double& omega,
+                   double& acc_x, double& acc_y, double& acc_omega) const override ;
 
-    bool OptimizeTeb(int iterations_innerloop, int iterations_outerloop, bool compute_cost_afterwards = false,
-                     double obst_cost_scale=1.0, double viapoint_cost_scale=1.0, bool alternative_time_cost=false);
+  bool OptimizeTeb(int iterations_innerloop, int iterations_outerloop, bool compute_cost_afterwards = false,
+                   double obst_cost_scale=1.0, double viapoint_cost_scale=1.0, bool alternative_time_cost=false);
 
-    void SetVisualization(LocalVisualizationPtr visualize);
+  void SetVisualization(LocalVisualizationPtr visualize);
 
-    virtual void Visualize();
+  virtual void Visualize();
 
-    void SetVelocityStart(const geometry_msgs::Twist& vel_start);
+  void SetVelocityStart(const geometry_msgs::Twist& vel_start);
 
-    void SetVelocityEnd(const geometry_msgs::Twist& vel_end);
+  void SetVelocityEnd(const geometry_msgs::Twist& vel_end);
 
 
-    void SetVelocityGoalFree()
-    {
-        vel_end_.first = false;
-    }
+  void SetVelocityGoalFree() {
+    vel_end_.first = false;
+  }
 
-    void SetObstVector(ObstContainer* obst_vector)
-    {
-        obstacles_ = obst_vector;
-    }
+  void SetObstVector(ObstContainer* obst_vector) {
+    obstacles_ = obst_vector;
+  }
 
-    const ObstContainer& GetObstVector() const
-    {
-        return *obstacles_;
-    }
+  const ObstContainer& GetObstVector() const {
+    return *obstacles_;
+  }
 
-    void SetViaPoints(const ViaPointContainer* via_points)
-    {
-        via_points_ = via_points;
-    }
+  void SetViaPoints(const ViaPointContainer* via_points) {
+    via_points_ = via_points;
+  }
 
-    const ViaPointContainer& GetViaPoints() const
-    {
-        return *via_points_;
-    }
+  const ViaPointContainer& GetViaPoints() const {
+    return *via_points_;
+  }
 
-    void ClearPlanner() override
-    {
-        ClearGraph();
-    }
+  void ClearPlanner() override {
+    ClearGraph();
+  }
 
-    virtual void SetPreferredTurningDir(RotType dir)
-    {
-        prefer_rotdir_=dir;
-    }
+  virtual void SetPreferredTurningDir(RotType dir) {
+    prefer_rotdir_=dir;
+  }
 
-    static void RegisterG2OTypes();
+  static void RegisterG2OTypes();
 
-    boost::shared_ptr<g2o::SparseOptimizer> Optimizer()
-    {
-        return optimizer_;
-    }
+  boost::shared_ptr<g2o::SparseOptimizer> Optimizer() {
+    return optimizer_;
+  }
 
-    bool IsOptimized() const
-    {
-        return optimized_;
-    }
+  bool IsOptimized() const {
+    return optimized_;
+  }
 
-    void ComputeCurrentCost(double obst_cost_scale=1.0, double viapoint_cost_scale=1.0, bool alternative_time_cost=false);
+  void ComputeCurrentCost(double obst_cost_scale=1.0, double viapoint_cost_scale=1.0, bool alternative_time_cost=false);
 
-    virtual void ComputeCurrentCost(std::vector<double>& cost, double obst_cost_scale=1.0,
-                                    double viapoint_cost_scale=1.0, bool alternative_time_cost=false)
-    {
-        ComputeCurrentCost(obst_cost_scale, viapoint_cost_scale, alternative_time_cost);
-        cost.push_back( GetCurrentCost() );
-    }
+  virtual void ComputeCurrentCost(std::vector<double>& cost, double obst_cost_scale=1.0,
+                                  double viapoint_cost_scale=1.0, bool alternative_time_cost=false) {
+    ComputeCurrentCost(obst_cost_scale, viapoint_cost_scale, alternative_time_cost);
+    cost.push_back( GetCurrentCost() );
+  }
 
-    double GetCurrentCost() const
-    {
-        return cost_;
-    }
+  double GetCurrentCost() const {
+    return cost_;
+  }
 
-    inline void ExtractVelocity(const DataBase& pose1, const DataBase& pose2, double dt,
-                                double& vx, double& vy, double& omega) const;
+  inline void ExtractVelocity(const DataBase& pose1, const DataBase& pose2, double dt,
+                              double& vx, double& vy, double& omega) const;
 
-    void GetVelocityProfile(std::vector<geometry_msgs::Twist>& velocity_profile) const;
+  void GetVelocityProfile(std::vector<geometry_msgs::Twist>& velocity_profile) const;
 
-    //void GetFullTrajectory(std::vector<TrajectoryPointMsg>& trajectory) const;
+  //void GetFullTrajectory(std::vector<TrajectoryPointMsg>& trajectory) const;
 
-    bool IsTrajectoryFeasible(roborts_common::ErrorInfo &error_info, RobotPositionCost* position_cost, const std::vector<Eigen::Vector2d>& footprint_spec,
-                              double inscribed_radius = 0.0, double circumscribed_radius=0.0, int look_ahead_idx=-1) override ;
+  bool IsTrajectoryFeasible(roborts_common::ErrorInfo &error_info, RobotPositionCost* position_cost, const std::vector<Eigen::Vector2d>& footprint_spec,
+                            double inscribed_radius = 0.0, double circumscribed_radius=0.0, int look_ahead_idx=-1) override ;
 
-    bool IsHorizonReductionAppropriate(const std::vector<DataBase>& initial_plan) const override ;
+  bool IsHorizonReductionAppropriate(const std::vector<DataBase>& initial_plan) const override ;
 
-protected:
-    bool BuildGraph(double weight_multiplier=1.0);
+ protected:
+  bool BuildGraph(double weight_multiplier=1.0);
 
-    bool OptimizeGraph(int no_iterations, bool clear_after=true);
+  bool OptimizeGraph(int no_iterations, bool clear_after=true);
 
-    void ClearGraph();
+  void ClearGraph();
 
-    void AddTebVertices();
+  void AddTebVertices();
 
-    void AddVelocityEdges();
+  void AddVelocityEdges();
 
-    void AddAccelerationEdges();
+  void AddAccelerationEdges();
 
-    void AddTimeOptimalEdges();
+  void AddTimeOptimalEdges();
 
-    void AddObstacleEdges(double weight_multiplier=1.0);
+  void AddObstacleEdges(double weight_multiplier=1.0);
 
-    void AddObstacleLegacyEdges(double weight_multiplier=1.0);
+  void AddObstacleLegacyEdges(double weight_multiplier=1.0);
 
-    void AddViaPointsEdges();
+  void AddViaPointsEdges();
 
-    void AddPreferRotDirEdges();
+  void AddPreferRotDirEdges();
 
-    void AddKinematicsDiffDriveEdges();
+  void AddKinematicsDiffDriveEdges();
 
-    void AddKinematicsCarlikeEdges();
+  void AddKinematicsCarlikeEdges();
 
-    void AddDynamicObstaclesEdges();
+  void AddDynamicObstaclesEdges();
 
 
 
-    boost::shared_ptr<g2o::SparseOptimizer> InitOptimizer();
+  boost::shared_ptr<g2o::SparseOptimizer> InitOptimizer();
 
-    ObstContainer* obstacles_;
-    const ViaPointContainer* via_points_;
-    double cost_;
-    RotType prefer_rotdir_;
-    LocalVisualizationPtr visualization_;
+  ObstContainer* obstacles_;
+  const ViaPointContainer* via_points_;
+  double cost_;
+  RotType prefer_rotdir_;
+  LocalVisualizationPtr visualization_;
 
 
-    RobotFootprintModelPtr robot_model_;
-    TebVertexConsole vertex_console_;
-    boost::shared_ptr<g2o::SparseOptimizer> optimizer_;
-    std::pair<bool, geometry_msgs::Twist> vel_start_;
-    std::pair<bool, geometry_msgs::Twist> vel_end_;
+  RobotFootprintModelPtr robot_model_;
+  TebVertexConsole vertex_console_;
+  boost::shared_ptr<g2o::SparseOptimizer> optimizer_;
+  std::pair<bool, geometry_msgs::Twist> vel_start_;
+  std::pair<bool, geometry_msgs::Twist> vel_end_;
 
-    Robot        robot_info_;
-    Config       param_config_;
-    Obstacles    obstacles_info_;
-    Trajectory   trajectory_info_;
-    Optimization optimization_info_;
+  Robot        robot_info_;
+  Config       param_config_;
+  Obstacles    obstacles_info_;
+  Trajectory   trajectory_info_;
+  Optimization optimization_info_;
 
-    bool initialized_;
-    bool optimized_;
+  bool initialized_;
+  bool optimized_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 

@@ -71,90 +71,82 @@
 #include "timed_elastic_band/teb_base_eage.h"
 #include "timed_elastic_band/teb_penalties.h"
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 
-class VelocityEdge : public TebMultiEdgeBase<2, double>
-{
+class VelocityEdge : public TebMultiEdgeBase<2, double> {
 
-public:
-    VelocityEdge()
-    {
-        this->resize(3);
+ public:
+  VelocityEdge() {
+    this->resize(3);
+  }
+
+  void computeError() {
+    const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
+    const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
+    const TebVertexTimeDiff *deltaT = static_cast<const TebVertexTimeDiff *>(_vertices[2]);
+
+    const Eigen::Vector2d deltaS = conf2->estimate().GetPosition() - conf1->estimate().GetPosition();
+
+    double dist = deltaS.norm();
+    const double angle_diff = g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta());
+    if (config_param_->trajectory_opt().exact_arc_length() && angle_diff != 0) {
+      double radius = dist / (2 * sin(angle_diff / 2));
+      dist = fabs(angle_diff * radius);
     }
+    double vel = dist / deltaT->estimate();
 
-    void computeError()
-    {
-        const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
-        const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
-        const TebVertexTimeDiff *deltaT = static_cast<const TebVertexTimeDiff *>(_vertices[2]);
+    vel *= LogisticSigmoid(100 * (deltaS.x() * cos(conf1->GetPose().GetTheta())
+        + deltaS.y() * sin(conf1->GetPose().GetTheta())));
 
-        const Eigen::Vector2d deltaS = conf2->estimate().GetPosition() - conf1->estimate().GetPosition();
+    const double omega = angle_diff / deltaT->estimate();
 
-        double dist = deltaS.norm();
-        const double angle_diff = g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta());
-        if (config_param_->trajectory_opt().exact_arc_length() && angle_diff != 0)
-        {
-            double radius = dist / (2 * sin(angle_diff / 2));
-            dist = fabs(angle_diff * radius);
-        }
-        double vel = dist / deltaT->estimate();
+    _error[0] = PenaltyBoundToInterval(vel, -config_param_->kinematics_opt().max_vel_x_backwards(),
+                                       config_param_->kinematics_opt().max_vel_x(), config_param_->optimize_info().penalty_epsilon());
+    _error[1] = PenaltyBoundToInterval(omega, config_param_->kinematics_opt().max_vel_theta(),
+                                       config_param_->optimize_info().penalty_epsilon());
+  }
 
-        vel *= LogisticSigmoid(100 * (deltaS.x() * cos(conf1->GetPose().GetTheta())
-                                      + deltaS.y() * sin(conf1->GetPose().GetTheta())));
+ public:
 
-        const double omega = angle_diff / deltaT->estimate();
-
-        _error[0] = PenaltyBoundToInterval(vel, -config_param_->kinematics_opt().max_vel_x_backwards(),
-                                           config_param_->kinematics_opt().max_vel_x(), config_param_->optimize_info().penalty_epsilon());
-        _error[1] = PenaltyBoundToInterval(omega, config_param_->kinematics_opt().max_vel_theta(),
-                                           config_param_->optimize_info().penalty_epsilon());
-    }
-
-public:
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-class VelocityHolonomicEdge : public TebMultiEdgeBase<3, double>
-{
-public:
+class VelocityHolonomicEdge : public TebMultiEdgeBase<3, double> {
+ public:
 
-    VelocityHolonomicEdge()
-    {
-        this->resize(3);
-    }
+  VelocityHolonomicEdge() {
+    this->resize(3);
+  }
 
-    void computeError()
-    {
+  void computeError() {
 
-        const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
-        const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
-        const TebVertexTimeDiff *deltaT = static_cast<const TebVertexTimeDiff *>(_vertices[2]);
-        const Eigen::Vector2d deltaS = conf2->estimate().GetPosition() - conf1->estimate().GetPosition();
+    const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
+    const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
+    const TebVertexTimeDiff *deltaT = static_cast<const TebVertexTimeDiff *>(_vertices[2]);
+    const Eigen::Vector2d deltaS = conf2->estimate().GetPosition() - conf1->estimate().GetPosition();
 
-        double cos_theta1 = std::cos(conf1->GetPose().GetTheta());
-        double sin_theta1 = std::sin(conf1->GetPose().GetTheta());
+    double cos_theta1 = std::cos(conf1->GetPose().GetTheta());
+    double sin_theta1 = std::sin(conf1->GetPose().GetTheta());
 
-        double r_dx = cos_theta1 * deltaS.x() + sin_theta1 * deltaS.y();
-        double r_dy = -sin_theta1 * deltaS.x() + cos_theta1 * deltaS.y();
+    double r_dx = cos_theta1 * deltaS.x() + sin_theta1 * deltaS.y();
+    double r_dy = -sin_theta1 * deltaS.x() + cos_theta1 * deltaS.y();
 
-        double vx = r_dx / deltaT->estimate();
-        double vy = r_dy / deltaT->estimate();
-        double omega = g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta()) / deltaT->estimate();
+    double vx = r_dx / deltaT->estimate();
+    double vy = r_dy / deltaT->estimate();
+    double omega = g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta()) / deltaT->estimate();
 
-        _error[0] = PenaltyBoundToInterval(vx, -config_param_->kinematics_opt().max_vel_x_backwards(),
-                                           config_param_->kinematics_opt().max_vel_x(), config_param_->optimize_info().penalty_epsilon());
-        _error[1] = PenaltyBoundToInterval(vy, config_param_->kinematics_opt().max_vel_y(), 0.0);
-        _error[2] = PenaltyBoundToInterval(omega, config_param_->kinematics_opt().max_vel_theta(),
-                                           config_param_->optimize_info().penalty_epsilon());
+    _error[0] = PenaltyBoundToInterval(vx, -config_param_->kinematics_opt().max_vel_x_backwards(),
+                                       config_param_->kinematics_opt().max_vel_x(), config_param_->optimize_info().penalty_epsilon());
+    _error[1] = PenaltyBoundToInterval(vy, config_param_->kinematics_opt().max_vel_y(), 0.0);
+    _error[2] = PenaltyBoundToInterval(omega, config_param_->kinematics_opt().max_vel_theta(),
+                                       config_param_->optimize_info().penalty_epsilon());
 
-    }
+  }
 
-public:
+ public:
 
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 

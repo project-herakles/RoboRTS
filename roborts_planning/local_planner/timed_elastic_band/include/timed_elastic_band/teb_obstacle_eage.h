@@ -68,98 +68,85 @@
 
 
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 
-class ObstacleEdge : public TebUnaryEdgeBase<1, const Obstacle *, TebVertexPose>
-{
-public:
+class ObstacleEdge : public TebUnaryEdgeBase<1, const Obstacle *, TebVertexPose> {
+ public:
 
-    ObstacleEdge()
-    {
-        _measurement = NULL;
-    }
+  ObstacleEdge() {
+    _measurement = NULL;
+  }
 
-    void computeError()
-    {
-        const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
+  void computeError() {
+    const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
 
-        double dist = robot_model_->CalculateDistance(bandpt->GetPose(), _measurement);
+    double dist = robot_model_->CalculateDistance(bandpt->GetPose(), _measurement);
 
-        _error[0] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().min_obstacle_dist(),
-                                          config_param_->optimize_info().penalty_epsilon());
+    _error[0] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().min_obstacle_dist(),
+                                      config_param_->optimize_info().penalty_epsilon());
 
-    }
+  }
 
-    void SetObstacle(const Obstacle *obstacle)
-    {
-        _measurement = obstacle;
-    }
-    void SetRobotModel(const BaseRobotFootprintModel *robot_model)
-    {
-        robot_model_ = robot_model;
-    }
+  void SetObstacle(const Obstacle *obstacle) {
+    _measurement = obstacle;
+  }
+  void SetRobotModel(const BaseRobotFootprintModel *robot_model) {
+    robot_model_ = robot_model;
+  }
+  
+  void SetParameters(const Config &config_param,const BaseRobotFootprintModel *robot_model, const Obstacle *obstacle) {
+    config_param_ = &config_param;
+    robot_model_ = robot_model;
+    _measurement = obstacle;
+  }
 
-    void SetParameters(const Config &config_param,const BaseRobotFootprintModel *robot_model, const Obstacle *obstacle)
-    {
-        config_param_ = &config_param;
-        robot_model_ = robot_model;
-        _measurement = obstacle;
-    }
+ protected:
 
-protected:
+  const BaseRobotFootprintModel *robot_model_;
 
-    const BaseRobotFootprintModel *robot_model_;
-
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-class InflatedObstacleEdge : public TebUnaryEdgeBase<2, const Obstacle *, TebVertexPose>
-{
-public:
+class InflatedObstacleEdge : public TebUnaryEdgeBase<2, const Obstacle *, TebVertexPose> {
+ public:
 
-    InflatedObstacleEdge()
-    {
-        _measurement = NULL;
-    }
+  InflatedObstacleEdge() {
+    _measurement = NULL;
+  }
 
-    void computeError()
-    {
-        const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
+  void computeError() {
+    const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
 
-        double dist = robot_model_->CalculateDistance(bandpt->GetPose(), _measurement);
+    double dist = robot_model_->CalculateDistance(bandpt->GetPose(), _measurement);
 
-        _error[0] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().min_obstacle_dist(),
-                                          config_param_->optimize_info().penalty_epsilon());
-        _error[1] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().inflation_dist(), 0.0);
+    _error[0] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().min_obstacle_dist(),
+                                      config_param_->optimize_info().penalty_epsilon());
+    _error[1] = PenaltyBoundFromBelow(dist, config_param_->obstacles_opt().inflation_dist(), 0.0);
 
-    }
+  }
 
-    void SetObstacle(const Obstacle *obstacle)
-    {
-        _measurement = obstacle;
-    }
+  void SetObstacle(const Obstacle *obstacle) {
+    _measurement = obstacle;
+  }
 
-    void SetRobotModel(const BaseRobotFootprintModel *robot_model)
-    {
-        robot_model_ = robot_model;
-    }
+  void SetRobotModel(const BaseRobotFootprintModel *robot_model) {
+    robot_model_ = robot_model;
+  }
 
-    void SetParameters(const Config &config_param, const BaseRobotFootprintModel *robot_model, const Obstacle *obstacle)
-    {
-        config_param_ = &config_param;
-        robot_model_ = robot_model;
-        _measurement = obstacle;
-    }
+  void SetParameters(const Config &config_param, const BaseRobotFootprintModel *robot_model, const Obstacle *obstacle) {
+    config_param_ = &config_param;
+    robot_model_ = robot_model;
+    _measurement = obstacle;
+  }
 
-protected:
+ protected:
 
-    const BaseRobotFootprintModel *robot_model_;
+  const BaseRobotFootprintModel *robot_model_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 

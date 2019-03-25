@@ -69,168 +69,143 @@
 
 #include "timed_elastic_band/proto/timed_elastic_band.pb.h"
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 template <int D, typename E, typename VertexXi>
-class TebUnaryEdgeBase : public g2o::BaseUnaryEdge <D, E, VertexXi>
-{
-public:
-    using typename g2o::BaseUnaryEdge<D, E, VertexXi>::ErrorVector;
-    using g2o::BaseUnaryEdge<D, E, VertexXi>::computeError;
+class TebUnaryEdgeBase : public g2o::BaseUnaryEdge <D, E, VertexXi> {
+ public:
+  using typename g2o::BaseUnaryEdge<D, E, VertexXi>::ErrorVector;
+  using g2o::BaseUnaryEdge<D, E, VertexXi>::computeError;
 
-    TebUnaryEdgeBase ()
-    {
-        _vertices[0] = NULL;
+  TebUnaryEdgeBase () {
+    _vertices[0] = NULL;
+  }
+
+  virtual ~TebUnaryEdgeBase() {
+    if (_vertices[0]) {
+      _vertices[0]->edges().erase(this);
     }
+  }
 
-    virtual ~TebUnaryEdgeBase()
-    {
-        if (_vertices[0])
-        {
-            _vertices[0]->edges().erase(this);
-        }
-    }
-
-    ErrorVector& GetError ()
-    {
-        computeError();
-        return _error;
-    }
-    void SetConfig(const Config &config_param)
-    {
-        config_param_ = &config_param;
-    }
-    virtual bool read(std::istream& is)
-    {
-        return true;
-    }
-    virtual bool write(std::ostream& os) const
-    {
-        return os.good();
-    }
+  ErrorVector& GetError () {
+    computeError();
+    return _error;
+  }
+  void SetConfig(const Config &config_param) {
+    config_param_ = &config_param;
+  }
+  virtual bool read(std::istream& is) {
+    return true;
+  }
+  virtual bool write(std::ostream& os) const {
+    return os.good();
+  }
 
 
-protected:
+ protected:
 
-    using g2o::BaseUnaryEdge<D, E, VertexXi>::_error;
-    using g2o::BaseUnaryEdge<D, E, VertexXi>::_vertices;
-    const Config *config_param_;
+  using g2o::BaseUnaryEdge<D, E, VertexXi>::_error;
+  using g2o::BaseUnaryEdge<D, E, VertexXi>::_vertices;
+  const Config *config_param_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 }; // class TebBaseEage
 
 template <int D, typename E, typename VertexXi, typename VertexXj>
-class TebBinaryEdgeBase : public g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>
-{
-public:
+class TebBinaryEdgeBase : public g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj> {
+ public:
 
-    using typename g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::ErrorVector;
-    using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::computeError;
+  using typename g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::ErrorVector;
+  using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::computeError;
 
-    TebBinaryEdgeBase()
-    {
-        _vertices[0] = _vertices[1] = NULL;
-    }
+  TebBinaryEdgeBase() {
+    _vertices[0] = _vertices[1] = NULL;
+  }
 
-    virtual ~TebBinaryEdgeBase()
-    {
-        if(_vertices[0])
-            _vertices[0]->edges().erase(this);
-        if(_vertices[1])
-            _vertices[1]->edges().erase(this);
-    }
+  virtual ~TebBinaryEdgeBase() {
+    if(_vertices[0])
+      _vertices[0]->edges().erase(this);
+    if(_vertices[1])
+      _vertices[1]->edges().erase(this);
+  }
 
-    ErrorVector& GetError()
-    {
-        computeError();
-        return _error;
-    }
+  ErrorVector& GetError() {
+    computeError();
+    return _error;
+  }
 
-    void SetConfig(const Config &config_param)
-    {
-        config_param_ = &config_param;
-    }
+  void SetConfig(const Config &config_param) {
+    config_param_ = &config_param;
+  }
 
-    virtual bool read(std::istream& is)
-    {
-        return true;
-    }
+  virtual bool read(std::istream& is) {
+    return true;
+  }
 
-    virtual bool write(std::ostream& os) const
-    {
-        return os.good();
-    }
+  virtual bool write(std::ostream& os) const {
+    return os.good();
+  }
 
-protected:
+ protected:
 
-    using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::_error;
-    using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::_vertices;
-    const Config *config_param_;
+  using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::_error;
+  using g2o::BaseBinaryEdge<D, E, VertexXi, VertexXj>::_vertices;
+  const Config *config_param_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 template <int D, typename E>
-class TebMultiEdgeBase : public g2o::BaseMultiEdge<D, E>
-{
+class TebMultiEdgeBase : public g2o::BaseMultiEdge<D, E> {
 
-public:
-    using typename g2o::BaseMultiEdge<D, E>::ErrorVector;
-    using g2o::BaseMultiEdge<D, E>::computeError;
+ public:
+  using typename g2o::BaseMultiEdge<D, E>::ErrorVector;
+  using g2o::BaseMultiEdge<D, E>::computeError;
 
-    TebMultiEdgeBase()
-    {
+  TebMultiEdgeBase() {
 
+  }
+
+  virtual ~TebMultiEdgeBase() {
+    for(std::size_t i=0; i<_vertices.size(); ++i) {
+      if(_vertices[i])
+        _vertices[i]->edges().erase(this);
     }
+  }
 
-    virtual ~TebMultiEdgeBase()
-    {
-        for(std::size_t i=0; i<_vertices.size(); ++i)
-        {
-            if(_vertices[i])
-                _vertices[i]->edges().erase(this);
-        }
-    }
+  virtual void resize(size_t size) {
+    g2o::BaseMultiEdge<D, E>::resize(size);
 
-    virtual void resize(size_t size)
-    {
-        g2o::BaseMultiEdge<D, E>::resize(size);
+    for(std::size_t i=0; i<_vertices.size(); ++i)
+      _vertices[i] = NULL;
+  }
 
-        for(std::size_t i=0; i<_vertices.size(); ++i)
-            _vertices[i] = NULL;
-    }
+  ErrorVector& GetError() {
+    computeError();
+    return _error;
+  }
 
-    ErrorVector& GetError()
-    {
-        computeError();
-        return _error;
-    }
+  void SetConfig(const Config &config_param) {
+    config_param_ = &config_param;
+  }
 
-    void SetConfig(const Config &config_param)
-    {
-        config_param_ = &config_param;
-    }
+  virtual bool read(std::istream& is) {
+    return true;
+  }
 
-    virtual bool read(std::istream& is)
-    {
-        return true;
-    }
+  virtual bool write(std::ostream& os) const {
+    return os.good();
+  }
 
-    virtual bool write(std::ostream& os) const
-    {
-        return os.good();
-    }
+ protected:
 
-protected:
+  using g2o::BaseMultiEdge<D, E>::_error;
+  using g2o::BaseMultiEdge<D, E>::_vertices;
+  const Config *config_param_;
 
-    using g2o::BaseMultiEdge<D, E>::_error;
-    using g2o::BaseMultiEdge<D, E>::_vertices;
-    const Config *config_param_;
-
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 } // namespace roborts_local_planner

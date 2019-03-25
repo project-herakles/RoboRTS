@@ -28,26 +28,25 @@ namespace roborts_camera
 /**
  * @brief Camera base class for the camera factory
  */
-class CameraBase
-{
-public:
-    /**
-     * @brief Constructor of CameraBase
-     * @param camera_info  Information and parameters of camera
-     */
-    explicit CameraBase(CameraInfo camera_info):camera_info_(camera_info),camera_initialized_(false) {};
-    virtual ~CameraBase() = default;
-    /**
-     * @brief Start to read camera
-     * @param img Image data in form of cv::Mat to be read
-     */
-    virtual void StartReadCamera(cv::Mat &img) = 0;
+class CameraBase {
+ public:
+  /**
+   * @brief Constructor of CameraBase
+   * @param camera_info  Information and parameters of camera
+   */
+  explicit CameraBase(CameraInfo camera_info):camera_info_(camera_info),camera_initialized_(false){};
+  virtual ~CameraBase() = default;
+  /**
+   * @brief Start to read camera
+   * @param img Image data in form of cv::Mat to be read
+   */
+  virtual void StartReadCamera(cv::Mat &img) = 0;
 
-protected:
-    //! flag for camera initialization
-    bool camera_initialized_;
-    //! information and parameters of camera
-    CameraInfo camera_info_;
+ protected:
+  //! flag for camera initialization
+  bool camera_initialized_;
+  //! information and parameters of camera
+  CameraInfo camera_info_;
 };
 } //namespace roborts_camera
 

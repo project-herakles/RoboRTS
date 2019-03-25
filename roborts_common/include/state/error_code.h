@@ -20,19 +20,17 @@
 
 #include <string>
 
-namespace roborts_common
-{
+namespace roborts_common{
 
-enum ErrorCode
-{
-    OK = 0,
-    Error = 1,
-    /************************HARDWARE********************/
+enum ErrorCode{
+  OK = 0,
+  Error = 1,
+/************************HARDWARE********************/
 
 
 
-    /***********************SOFTWARRE********************/
-    /***************DRIVER******************/
+/***********************SOFTWARRE********************/
+  /***************DRIVER******************/
     //camera
     CAMERA_ERROR = 10000,
     IMAGE_READ_ERROR = 10001,
@@ -42,7 +40,7 @@ enum ErrorCode
     LIDAR_ERROR = 10100,
 
 
-    /**************PERCEPTION***************/
+  /**************PERCEPTION***************/
     //mapping
     MAPPING_ERROR = 11000,
 
@@ -56,12 +54,12 @@ enum ErrorCode
     DETECTION_INIT_ERROR = 12200,
 
 
-    /**************DECISION*****************/
+  /**************DECISION*****************/
     //decision
     DECISION_ERROR = 13000,
 
 
-    /**************PLANNING*****************/
+  /**************PLANNING*****************/
 
     //global planner
     GP_INITILIZATION_ERROR = 14000,
@@ -87,55 +85,43 @@ enum ErrorCode
     LP_OSCILLATION_ERROR
 
 
-    /**************CONTROL******************/
+  /**************CONTROL******************/
 };
 
-class ErrorInfo
-{
+class ErrorInfo {
 
-public:
-    ErrorInfo():error_code_(ErrorCode::OK),error_msg_("") {};
-    ErrorInfo(ErrorCode error_code, const std::string &error_msg=""):error_code_(error_code),error_msg_(error_msg) {};
+ public:
+  ErrorInfo():error_code_(ErrorCode::OK),error_msg_(""){};
+  ErrorInfo(ErrorCode error_code, const std::string &error_msg=""):error_code_(error_code),error_msg_(error_msg){};
 
-    ErrorInfo& operator= ( const ErrorInfo& error_info )
-    {
-        if (&error_info != this)
-        {
-            error_code_ = error_info.error_code_;
-            error_msg_ = error_info.error_msg_;
-        }
-        return *this;
+  ErrorInfo& operator= ( const ErrorInfo& error_info ) {
+    if (&error_info != this) {
+      error_code_ = error_info.error_code_;
+      error_msg_ = error_info.error_msg_;
     }
+    return *this;
+  }
 
-    static ErrorInfo OK()
-    {
-        return ErrorInfo();
-    }
+  static ErrorInfo OK(){
+    return ErrorInfo();
+  }
 
-    ErrorCode error_code() const
-    {
-        return error_code_;
-    };
-    const std::string &error_msg() const
-    {
-        return error_msg_;
-    }
+  ErrorCode error_code() const { return error_code_;};
+  const std::string &error_msg() const { return error_msg_; }
 
-    bool operator==(const ErrorInfo& rhs)
-    {
-        return error_code_==rhs.error_code();
-    }
+  bool operator==(const ErrorInfo& rhs){
+    return error_code_==rhs.error_code();
+  }
 
-    bool IsOK() const
-    {
-        return (error_code_ == ErrorCode::OK);
-    }
+  bool IsOK() const{
+    return (error_code_ == ErrorCode::OK);
+  }
 
-    ~ErrorInfo()= default;
+  ~ErrorInfo()= default;
 
-private:
-    ErrorCode error_code_;
-    std::string error_msg_;
+ private:
+  ErrorCode error_code_;
+  std::string error_msg_;
 
 
 };

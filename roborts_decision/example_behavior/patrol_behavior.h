@@ -10,102 +10,90 @@
 
 #include "line_iterator.h"
 
-namespace roborts_decision
-{
-class PatrolBehavior
-{
-public:
-    PatrolBehavior(ChassisExecutor* &chassis_executor,
-                   Blackboard* &blackboard,
-                   const std::string & proto_file_path) : chassis_executor_(chassis_executor),
-        blackboard_(blackboard)
-    {
+namespace roborts_decision {
+class PatrolBehavior {
+ public:
+  PatrolBehavior(ChassisExecutor* &chassis_executor,
+                 Blackboard* &blackboard,
+                 const std::string & proto_file_path) : chassis_executor_(chassis_executor),
+                                                        blackboard_(blackboard) {
 
-        patrol_count_ = 0;
-        point_size_ = 0;
+    patrol_count_ = 0;
+    point_size_ = 0;
 
-        if (!LoadParam(proto_file_path))
-        {
-            ROS_ERROR("%s can't open file", __FUNCTION__);
-        }
-
+    if (!LoadParam(proto_file_path)) {
+      ROS_ERROR("%s can't open file", __FUNCTION__);
     }
 
-    void Run()
-    {
+  }
 
-        auto executor_state = Update();
+  void Run() {
 
-        std::cout << "state: " << (int)(executor_state) << std::endl;
+    auto executor_state = Update();
 
-        if (executor_state != BehaviorState::RUNNING)
-        {
+    std::cout << "state: " << (int)(executor_state) << std::endl;
 
-            if (patrol_goals_.empty())
-            {
-                ROS_ERROR("patrol goal is empty");
-                return;
-            }
+    if (executor_state != BehaviorState::RUNNING) {
 
-            std::cout << "send goal" << std::endl;
-            chassis_executor_->Execute(patrol_goals_[patrol_count_]);
-            patrol_count_ = ++patrol_count_ % point_size_;
+      if (patrol_goals_.empty()) {
+        ROS_ERROR("patrol goal is empty");
+        return;
+      }
 
-        }
+      std::cout << "send goal" << std::endl;
+      chassis_executor_->Execute(patrol_goals_[patrol_count_]);
+      patrol_count_ = ++patrol_count_ % point_size_;
+
+    }
+  }
+
+  void Cancel() {
+    chassis_executor_->Cancel();
+  }
+
+  BehaviorState Update() {
+    return chassis_executor_->Update();
+  }
+
+  bool LoadParam(const std::string &proto_file_path) {
+    roborts_decision::DecisionConfig decision_config;
+    if (!roborts_common::ReadProtoFromTextFile(proto_file_path, &decision_config)) {
+      return false;
     }
 
-    void Cancel()
-    {
-        chassis_executor_->Cancel();
+    point_size_ = (unsigned int)(decision_config.point().size());
+    patrol_goals_.resize(point_size_);
+    for (int i = 0; i != point_size_; i++) {
+      patrol_goals_[i].header.frame_id = "map";
+      patrol_goals_[i].pose.position.x = decision_config.point(i).x();
+      patrol_goals_[i].pose.position.y = decision_config.point(i).y();
+      patrol_goals_[i].pose.position.z = decision_config.point(i).z();
+
+      tf::Quaternion quaternion = tf::createQuaternionFromRPY(decision_config.point(i).roll(),
+                                                              decision_config.point(i).pitch(),
+                                                              decision_config.point(i).yaw());
+      patrol_goals_[i].pose.orientation.x = quaternion.x();
+      patrol_goals_[i].pose.orientation.y = quaternion.y();
+      patrol_goals_[i].pose.orientation.z = quaternion.z();
+      patrol_goals_[i].pose.orientation.w = quaternion.w();
     }
 
-    BehaviorState Update()
-    {
-        return chassis_executor_->Update();
-    }
+    return true;
+  }
 
-    bool LoadParam(const std::string &proto_file_path)
-    {
-        roborts_decision::DecisionConfig decision_config;
-        if (!roborts_common::ReadProtoFromTextFile(proto_file_path, &decision_config))
-        {
-            return false;
-        }
+  ~PatrolBehavior() = default;
 
-        point_size_ = (unsigned int)(decision_config.point().size());
-        patrol_goals_.resize(point_size_);
-        for (int i = 0; i != point_size_; i++)
-        {
-            patrol_goals_[i].header.frame_id = "map";
-            patrol_goals_[i].pose.position.x = decision_config.point(i).x();
-            patrol_goals_[i].pose.position.y = decision_config.point(i).y();
-            patrol_goals_[i].pose.position.z = decision_config.point(i).z();
+ private:
+  //! executor
+  ChassisExecutor* const chassis_executor_;
 
-            tf::Quaternion quaternion = tf::createQuaternionFromRPY(decision_config.point(i).roll(),
-                                        decision_config.point(i).pitch(),
-                                        decision_config.point(i).yaw());
-            patrol_goals_[i].pose.orientation.x = quaternion.x();
-            patrol_goals_[i].pose.orientation.y = quaternion.y();
-            patrol_goals_[i].pose.orientation.z = quaternion.z();
-            patrol_goals_[i].pose.orientation.w = quaternion.w();
-        }
+  //! perception information
+  Blackboard* const blackboard_;
 
-        return true;
-    }
-
-    ~PatrolBehavior() = default;
-
-private:
-    //! executor
-    ChassisExecutor* const chassis_executor_;
-
-    //! perception information
-    Blackboard* const blackboard_;
-
-    //! patrol buffer
-    std::vector<geometry_msgs::PoseStamped> patrol_goals_;
-    unsigned int patrol_count_;
-    unsigned int point_size_;
+  //! patrol buffer
+  std::vector<geometry_msgs::PoseStamped> patrol_goals_;
+  unsigned int patrol_count_;
+  unsigned int point_size_;
 
 };
 }

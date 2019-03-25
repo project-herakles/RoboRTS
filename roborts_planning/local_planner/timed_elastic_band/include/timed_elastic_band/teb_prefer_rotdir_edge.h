@@ -67,44 +67,33 @@
 #include "timed_elastic_band/teb_base_eage.h"
 #include "timed_elastic_band/teb_penalties.h"
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 
 
-class PreferRotDirEdge : public TebBinaryEdgeBase<1, double, TebVertexPose, TebVertexPose>
-{
-public:
+class PreferRotDirEdge : public TebBinaryEdgeBase<1, double, TebVertexPose, TebVertexPose> {
+ public:
+  
+  PreferRotDirEdge() {
+    _measurement = 1;
+  }
+  
+  void computeError() {
+    const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
+    const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
 
-    PreferRotDirEdge()
-    {
-        _measurement = 1;
-    }
+    _error[0] = PenaltyBoundFromBelow(_measurement * g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta()), 0, 0);
+  }
 
-    void computeError()
-    {
-        const TebVertexPose *conf1 = static_cast<const TebVertexPose *>(_vertices[0]);
-        const TebVertexPose *conf2 = static_cast<const TebVertexPose *>(_vertices[1]);
+  void SetRotDir(double dir) {
+    _measurement = dir;
+  }
 
-        _error[0] = PenaltyBoundFromBelow(_measurement * g2o::normalize_theta(conf2->GetPose().GetTheta() - conf1->GetPose().GetTheta()), 0, 0);
-    }
+  void PreferRight() { _measurement = -1; }
 
-    void SetRotDir(double dir)
-    {
-        _measurement = dir;
-    }
+  void PreferLeft() { _measurement = 1; }
 
-    void PreferRight()
-    {
-        _measurement = -1;
-    }
-
-    void PreferLeft()
-    {
-        _measurement = 1;
-    }
-
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 

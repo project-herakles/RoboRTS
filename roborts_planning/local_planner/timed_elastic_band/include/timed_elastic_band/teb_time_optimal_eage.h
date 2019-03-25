@@ -71,35 +71,30 @@
 
 #define USE_ANALYTIC_JACOBI
 
-namespace roborts_local_planner
-{
+namespace roborts_local_planner {
 
-class TimeOptimalEdge : public TebUnaryEdgeBase<1, double, TebVertexTimeDiff>
-{
-public:
-    TimeOptimalEdge()
-    {
-        this->setMeasurement(0.);
-    }
+class TimeOptimalEdge : public TebUnaryEdgeBase<1, double, TebVertexTimeDiff> {
+ public:
+  TimeOptimalEdge() {
+    this->setMeasurement(0.);
+  }
 
-    void computeError()
-    {
-        const TebVertexTimeDiff *timediff = static_cast<const TebVertexTimeDiff *>(_vertices[0]);
+  void computeError() {
+    const TebVertexTimeDiff *timediff = static_cast<const TebVertexTimeDiff *>(_vertices[0]);
 
-        _error[0] = timediff->GetDiffTime();
+    _error[0] = timediff->GetDiffTime();
 
-    }
+  }
 
 #ifdef USE_ANALYTIC_JACOBI
 
-    void linearizeOplus()
-    {
-        _jacobianOplusXi(0, 0) = 1;
-    }
+  void linearizeOplus() {
+    _jacobianOplusXi(0, 0) = 1;
+  }
 #endif
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 } // namespace roborts_local_planner

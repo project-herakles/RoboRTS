@@ -62,8 +62,7 @@
 
 #include "io/io.h"
 
-namespace roborts_costmap
-{
+namespace roborts_costmap {
 static const unsigned char NO_INFORMATION = 255;
 static const unsigned char LETHAL_OBSTACLE = 254;
 static const unsigned char INSCRIBED_INFLATED_OBSTACLE = 253;

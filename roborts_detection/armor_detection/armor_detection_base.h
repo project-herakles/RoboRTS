@@ -22,23 +22,21 @@
 #include "state/error_code.h"
 #include "../util/cv_toolbox.h"
 
-namespace roborts_detection
-{
+namespace roborts_detection {
 
 using roborts_common::ErrorInfo;
 
-class ArmorDetectionBase
-{
-public:
-    ArmorDetectionBase(std::shared_ptr<CVToolbox> cv_toolbox)
-        : cv_toolbox_(cv_toolbox)
-    {  };
-    virtual void LoadParam() = 0;
-    virtual ErrorInfo DetectArmor(bool &detected, cv::Point3f &target_3d) = 0;
-    virtual void SetThreadState(bool thread_state) = 0;
-    virtual ~ArmorDetectionBase() = default;
-protected:
-    std::shared_ptr<CVToolbox> cv_toolbox_;
+class ArmorDetectionBase {
+ public:
+  ArmorDetectionBase(std::shared_ptr<CVToolbox> cv_toolbox)
+      : cv_toolbox_(cv_toolbox)
+  {  };
+  virtual void LoadParam() = 0;
+  virtual ErrorInfo DetectArmor(bool &detected, cv::Point3f &target_3d) = 0;
+  virtual void SetThreadState(bool thread_state) = 0;
+  virtual ~ArmorDetectionBase() = default;
+ protected:
+  std::shared_ptr<CVToolbox> cv_toolbox_;
 };
 } //namespace roborts_detection
 

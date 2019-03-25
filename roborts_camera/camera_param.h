@@ -23,83 +23,80 @@
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/CameraInfo.h>
 
-namespace roborts_camera
-{
+namespace roborts_camera {
 /**
  * @brief Information and parameter of camera
  */
-struct CameraInfo
-{
-    //! name of camera
-    std::string camera_name;
-    //! type of camera for camera factory product instantiation
-    std::string camera_type;
-    //! path of camera, i.e. /dev/video0
-    std::string camera_path;
-    //! camera matrix
-    cv::Mat camera_matrix;
-    //! camera distortion matrix
-    cv::Mat camera_distortion;
+struct CameraInfo {
+  //! name of camera
+  std::string camera_name;
+  //! type of camera for camera factory product instantiation
+  std::string camera_type;
+  //! path of camera, i.e. /dev/video0
+  std::string camera_path;
+  //! camera matrix
+  cv::Mat camera_matrix;
+  //! camera distortion matrix
+  cv::Mat camera_distortion;
 
-    //! resolution width
-    unsigned int resolution_width;
-    //! resolution height
-    unsigned int resolution_height;
+  //! resolution width
+  unsigned int resolution_width;
+  //! resolution height
+  unsigned int resolution_height;
 
-    //! width offset for image crop
-    unsigned int width_offset;
-    //! height offset for image crop
-    unsigned int height_offset;
+  //! width offset for image crop
+  unsigned int width_offset;
+  //! height offset for image crop
+  unsigned int height_offset;
 
-    //! camera fps
-    unsigned int fps;
-    //! flag of auto exposure
-    bool auto_exposure;
-    //! exposure value
-    unsigned int exposure_value;
-    //! exposure time
-    unsigned int exposure_time;
-    //! auto white balance
-    bool auto_white_balance;
-    //! auto gain
-    bool auto_gain;
-    //! contrast
-    unsigned int contrast;
+  //! camera fps
+  unsigned int fps;
+  //! flag of auto exposure
+  bool auto_exposure;
+  //! exposure value
+  unsigned int exposure_value;
+  //! exposure time
+  unsigned int exposure_time;
+  //! auto white balance
+  bool auto_white_balance;
+  //! auto gain
+  bool auto_gain;
+  //! contrast
+  unsigned int contrast;
 
-    //! camera information in form of ROS sensor_msgs
-    sensor_msgs::CameraInfoPtr ros_camera_info;
-    //! opencv video capture
-    cv::VideoCapture cap_handle;
+  //! camera information in form of ROS sensor_msgs
+  sensor_msgs::CameraInfoPtr ros_camera_info;
+  //! opencv video capture
+  cv::VideoCapture cap_handle;
 };
 
 /**
  * @brief camera parameter class to load and get camera parameters
  */
-class CameraParam
-{
-public:
-    /**
-     * @brief Constructor of CameraParam, load the camera parameter
-     */
-    CameraParam();
-    /**
-     * @brief load all camera parameters for different cameras
-     */
-    void LoadCameraParam();
-    /**
-     * @brief Get the camera parameters for different cameras
-     * @param cameras_param Camera parameters to update for different cameras
-     */
-    void GetCameraParam(std::vector<CameraInfo> &cameras_param);
-    /**
-     * @brief Get the camera parameters for different cameras
-     * @return Updated Camera parameters for different cameras
-     */
-    std::vector<CameraInfo>& GetCameraParam();
-    ~CameraParam() = default;
-private:
-    //! camera parameters for different cameras
-    std::vector<CameraInfo> cameras_param_;
+class CameraParam {
+ public:
+  /**
+   * @brief Constructor of CameraParam, load the camera parameter
+   */
+  CameraParam();
+  /**
+   * @brief load all camera parameters for different cameras
+   */
+  void LoadCameraParam();
+  /**
+   * @brief Get the camera parameters for different cameras
+   * @param cameras_param Camera parameters to update for different cameras
+   */
+  void GetCameraParam(std::vector<CameraInfo> &cameras_param);
+  /**
+   * @brief Get the camera parameters for different cameras
+   * @return Updated Camera parameters for different cameras
+   */
+  std::vector<CameraInfo>& GetCameraParam();
+  ~CameraParam() = default;
+ private:
+  //! camera parameters for different cameras
+  std::vector<CameraInfo> cameras_param_;
 };
 
 } //namespace roborts_camera

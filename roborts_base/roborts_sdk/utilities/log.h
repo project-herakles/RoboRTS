@@ -44,22 +44,20 @@
 #define LOG_WARNING_FIRST_N(times) LOG_FIRST_N(WARNING, times)
 
 
-class GLogWrapper
-{
-public:
-    GLogWrapper(char* program)
-    {
-        google::InitGoogleLogging(program);
-        FLAGS_stderrthreshold=google::WARNING;
-        FLAGS_colorlogtostderr=true;
-        FLAGS_v = 3;
-        google::InstallFailureSignalHandler();
-    }
+class GLogWrapper {
+ public:
+  GLogWrapper(char* program) {
+    google::InitGoogleLogging(program);
+    FLAGS_stderrthreshold=google::WARNING;
+    FLAGS_colorlogtostderr=true;
+    FLAGS_v = 3;
+    google::InstallFailureSignalHandler();
+  }
 
-    ~GLogWrapper()
-    {
-        google::ShutdownGoogleLogging();
-    }
+  ~GLogWrapper()
+  {
+    google::ShutdownGoogleLogging();
+  }
 };
 
 

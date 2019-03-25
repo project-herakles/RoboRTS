@@ -39,72 +39,67 @@
 #include "log.h"
 #include "sensor_odom.h"
 
-namespace roborts_localization
-{
+namespace roborts_localization{
 
 SensorOdom::SensorOdom(double alpha1,
                        double alpha2,
                        double alpha3,
                        double alpha4,
                        double alpha5) :
-    alpha1_(alpha1),
-    alpha2_(alpha2),
-    alpha3_(alpha3),
-    alpha4_(alpha4),
-    alpha5_(alpha5),
-    time_(0.0)
-{
-    odom_model_type_ = ODOM_MODEL_OMNI;
+                       alpha1_(alpha1),
+                       alpha2_(alpha2),
+                       alpha3_(alpha3),
+                       alpha4_(alpha4),
+                       alpha5_(alpha5),
+                       time_(0.0){
+  odom_model_type_ = ODOM_MODEL_OMNI;
 }
 
 //TODO(kevin.li): This version only support omni model now. We will add diff model in the future.
 
-void SensorOdom::SetModelOmni(double alpha1, double alpha2, double alpha3, double alpha4, double alpha5)
-{
-    odom_model_type_ = ODOM_MODEL_OMNI;
-    alpha1_ = alpha1;
-    alpha2_ = alpha2;
-    alpha3_ = alpha3;
-    alpha4_ = alpha4;
-    alpha5_ = alpha5;
+void SensorOdom::SetModelOmni(double alpha1, double alpha2, double alpha3, double alpha4, double alpha5) {
+  odom_model_type_ = ODOM_MODEL_OMNI;
+  alpha1_ = alpha1;
+  alpha2_ = alpha2;
+  alpha3_ = alpha3;
+  alpha4_ = alpha4;
+  alpha5_ = alpha5;
 }
 
-bool SensorOdom::UpdateAction(SampleSetPtr sample_set_ptr, const SensorOdomData &odom_data)
-{
+bool SensorOdom::UpdateAction(SampleSetPtr sample_set_ptr, const SensorOdomData &odom_data) {
 
-    DLOG_INFO << "Compute the new sample poses by motion model";
+  DLOG_INFO << "Compute the new sample poses by motion model";
 
-    Vec3d old_pose = (odom_data.pose) - (odom_data.delta);
+  Vec3d old_pose = (odom_data.pose) - (odom_data.delta);
 
-    double delta_bearing;
-    double delta_trans_hat, delta_rot_hat, delta_strafe_hat;
-    double delta_trans = std::sqrt(odom_data.delta[0] * odom_data.delta[0] + odom_data.delta[1] * odom_data.delta[1]);
-    double delta_rot = odom_data.delta[2];
+  double delta_bearing;
+  double delta_trans_hat, delta_rot_hat, delta_strafe_hat;
+  double delta_trans = std::sqrt(odom_data.delta[0] * odom_data.delta[0] + odom_data.delta[1] * odom_data.delta[1]);
+  double delta_rot = odom_data.delta[2];
 
-    double trans_hat_stddev = std::sqrt(alpha3_ * (delta_trans * delta_trans) + alpha1_ * (delta_rot * delta_rot));
-    double rot_hat_stddev = std::sqrt(alpha4_ * (delta_rot * delta_rot) + alpha2_ * (delta_trans * delta_trans));
-    double strafe_hat_stddev = std::sqrt(alpha1_ * (delta_rot * delta_rot) + alpha5_ * (delta_trans * delta_trans));
+  double trans_hat_stddev = std::sqrt(alpha3_ * (delta_trans * delta_trans) + alpha1_ * (delta_rot * delta_rot));
+  double rot_hat_stddev = std::sqrt(alpha4_ * (delta_rot * delta_rot) + alpha2_ * (delta_trans * delta_trans));
+  double strafe_hat_stddev = std::sqrt(alpha1_ * (delta_rot * delta_rot) + alpha5_ * (delta_trans * delta_trans));
 
-    for (int i = 0; i < sample_set_ptr->sample_count; i++)
-    {
+  for (int i = 0; i < sample_set_ptr->sample_count; i++) {
 
-        delta_bearing = math::AngleDiff<double>(std::atan2(odom_data.delta(1),
-                                                odom_data.delta(0)),
-                                                old_pose(2)) + sample_set_ptr->samples_vec[i].pose(2);
+    delta_bearing = math::AngleDiff<double>(std::atan2(odom_data.delta(1),
+                                               odom_data.delta(0)),
+                                    old_pose(2)) + sample_set_ptr->samples_vec[i].pose(2);
 
-        double cs_bearing = std::cos(delta_bearing);
-        double sn_bearing = std::sin(delta_bearing);
+    double cs_bearing = std::cos(delta_bearing);
+    double sn_bearing = std::sin(delta_bearing);
 
-        delta_trans_hat = delta_trans + math::RandomGaussianNumByStdDev<double>(trans_hat_stddev);
-        delta_rot_hat = delta_rot + math::RandomGaussianNumByStdDev<double>(rot_hat_stddev);
-        delta_strafe_hat = 0 + math::RandomGaussianNumByStdDev<double>(strafe_hat_stddev);
+    delta_trans_hat = delta_trans + math::RandomGaussianNumByStdDev<double>(trans_hat_stddev);
+    delta_rot_hat = delta_rot + math::RandomGaussianNumByStdDev<double>(rot_hat_stddev);
+    delta_strafe_hat = 0 + math::RandomGaussianNumByStdDev<double>(strafe_hat_stddev);
 
-        sample_set_ptr->samples_vec[i].pose[0] += (delta_trans_hat * cs_bearing + delta_strafe_hat * sn_bearing);
-        sample_set_ptr->samples_vec[i].pose[1] += (delta_trans_hat * sn_bearing - delta_strafe_hat * cs_bearing);
-        sample_set_ptr->samples_vec[i].pose[2] += delta_rot_hat;
+    sample_set_ptr->samples_vec[i].pose[0] += (delta_trans_hat * cs_bearing + delta_strafe_hat * sn_bearing);
+    sample_set_ptr->samples_vec[i].pose[1] += (delta_trans_hat * sn_bearing - delta_strafe_hat * cs_bearing);
+    sample_set_ptr->samples_vec[i].pose[2] += delta_rot_hat;
 
-    }
-    return true;
+  }
+  return true;
 }
 
 }// roborts_localization
