@@ -51,20 +51,23 @@
  *********************************************************************/
 #include "layer.h"
 
-namespace roborts_costmap {
+namespace roborts_costmap
+{
 
 Layer::Layer()
     : layered_costmap_(NULL), is_current_(false), is_enabled_(false), name_(), tf_(NULL) {}
 
-void Layer::Initialize(CostmapLayers *parent, std::string name, tf::TransformListener *tf) {
-  layered_costmap_ = parent;
-  name_ = name;
-  tf_ = tf;
-  OnInitialize();
+void Layer::Initialize(CostmapLayers *parent, std::string name, tf::TransformListener *tf)
+{
+    layered_costmap_ = parent;
+    name_ = name;
+    tf_ = tf;
+    OnInitialize();
 }
 
-const std::vector<geometry_msgs::Point> &Layer::GetFootprint() const {
-  return layered_costmap_->GetFootprint();
+const std::vector<geometry_msgs::Point> &Layer::GetFootprint() const
+{
+    return layered_costmap_->GetFootprint();
 }
 
 } //namespace roborts_costmap

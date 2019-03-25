@@ -68,46 +68,56 @@
 
 #include "local_planner/data_base.h"
 
-namespace roborts_local_planner {
-class TebVertexPose : public g2o::BaseVertex<3, DataBase> {
- public:
-  TebVertexPose (bool fixed = false) {
-    setToOriginImpl();
-    setFixed(fixed);
-  }
+namespace roborts_local_planner
+{
+class TebVertexPose : public g2o::BaseVertex<3, DataBase>
+{
+public:
+    TebVertexPose (bool fixed = false)
+    {
+        setToOriginImpl();
+        setFixed(fixed);
+    }
 
-  TebVertexPose (const DataBase& teb_data, bool fixed =false) {
-    _estimate = teb_data;
-    setFixed(fixed);
-  }
+    TebVertexPose (const DataBase& teb_data, bool fixed =false)
+    {
+        _estimate = teb_data;
+        setFixed(fixed);
+    }
 
-  ~TebVertexPose(){}
+    ~TebVertexPose() {}
 
-  virtual void setToOriginImpl() {
-    _estimate.SetZero();
-  }
+    virtual void setToOriginImpl()
+    {
+        _estimate.SetZero();
+    }
 
-  virtual void oplusImpl(const double* update) {
-    _estimate.Plus(update);
-  }
+    virtual void oplusImpl(const double* update)
+    {
+        _estimate.Plus(update);
+    }
 
-  virtual bool read(std::istream& is) {
-    return true;
-  }
+    virtual bool read(std::istream& is)
+    {
+        return true;
+    }
 
-  virtual bool write(std::ostream& os) const {
-    return true;
-  }
+    virtual bool write(std::ostream& os) const
+    {
+        return true;
+    }
 
-  DataBase& GetPose () {
-    return _estimate;
-  }
+    DataBase& GetPose ()
+    {
+        return _estimate;
+    }
 
-  const DataBase& GetPose () const {
-    return _estimate;
-  }
+    const DataBase& GetPose () const
+    {
+        return _estimate;
+    }
 
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 }; // class TebVertexPose
 

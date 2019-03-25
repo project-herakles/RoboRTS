@@ -55,27 +55,30 @@
 
 #include "costmap_interface.h"
 
-void SignalHandler(int signal){
-  if(ros::isInitialized() && ros::isStarted() && ros::ok() && !ros::isShuttingDown()){
-    ros::shutdown();
-  }
+void SignalHandler(int signal)
+{
+    if(ros::isInitialized() && ros::isStarted() && ros::ok() && !ros::isShuttingDown())
+    {
+        ros::shutdown();
+    }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 
-  signal(SIGINT, SignalHandler);
-  signal(SIGTERM,SignalHandler);
-  ros::init(argc, argv, "test_costmap", ros::init_options::NoSigintHandler);
-  tf::TransformListener tf(ros::Duration(10));
+    signal(SIGINT, SignalHandler);
+    signal(SIGTERM,SignalHandler);
+    ros::init(argc, argv, "test_costmap", ros::init_options::NoSigintHandler);
+    tf::TransformListener tf(ros::Duration(10));
 
-  std::string local_map = ros::package::getPath("roborts_costmap") + \
-      "/config/costmap_parameter_config_for_local_plan.prototxt";
-  roborts_costmap::CostmapInterface costmap_interface("map",
-                                                      tf,
-                                                      local_map.c_str());
+    std::string local_map = ros::package::getPath("roborts_costmap") + \
+                            "/config/costmap_parameter_config_for_local_plan.prototxt";
+    roborts_costmap::CostmapInterface costmap_interface("map",
+            tf,
+            local_map.c_str());
 
-  ros::AsyncSpinner async_spinner(1);
-  async_spinner.start();
-  ros::waitForShutdown();
-  return 0;
+    ros::AsyncSpinner async_spinner(1);
+    async_spinner.start();
+    ros::waitForShutdown();
+    return 0;
 }

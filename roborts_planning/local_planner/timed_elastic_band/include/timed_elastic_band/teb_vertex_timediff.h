@@ -67,44 +67,58 @@
 #include "g2o/core/hyper_graph_action.h"
 #include <Eigen/Core>
 
-namespace roborts_local_planner {
+namespace roborts_local_planner
+{
 
-class TebVertexTimeDiff : public g2o::BaseVertex<1, double> {
- public:
+class TebVertexTimeDiff : public g2o::BaseVertex<1, double>
+{
+public:
 
-  TebVertexTimeDiff(bool fixed = false) {
-    setToOriginImpl();
-    setFixed(fixed);
-  }
+    TebVertexTimeDiff(bool fixed = false)
+    {
+        setToOriginImpl();
+        setFixed(fixed);
+    }
 
-  TebVertexTimeDiff(double dt, bool fixed = false) {
-    _estimate = dt;
-    setFixed(fixed);
-  }
+    TebVertexTimeDiff(double dt, bool fixed = false)
+    {
+        _estimate = dt;
+        setFixed(fixed);
+    }
 
-  ~TebVertexTimeDiff() {}
+    ~TebVertexTimeDiff() {}
 
-  double &GetDiffTime() { return _estimate; }
+    double &GetDiffTime()
+    {
+        return _estimate;
+    }
 
-  const double &GetDiffTime() const { return _estimate; }
+    const double &GetDiffTime() const
+    {
+        return _estimate;
+    }
 
-  virtual void setToOriginImpl() {
-    _estimate = 0.1;
-  }
+    virtual void setToOriginImpl()
+    {
+        _estimate = 0.1;
+    }
 
-  virtual void oplusImpl(const double* update) {
-    _estimate += *update;
-  }
+    virtual void oplusImpl(const double* update)
+    {
+        _estimate += *update;
+    }
 
-  virtual bool read(std::istream& is) {
+    virtual bool read(std::istream& is)
+    {
 
-  }
+    }
 
-  virtual bool write(std::ostream& os) const {
-    return true;
-  }
+    virtual bool write(std::ostream& os) const
+    {
+        return true;
+    }
 
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 } // namespace roborts_local_planner

@@ -44,8 +44,10 @@
 #include <boost/array.hpp>
 #include "types.h"
 
-namespace roborts_localization {
-namespace math {
+namespace roborts_localization
+{
+namespace math
+{
 
 /**
  * @brief Angle normalization. Radian angle => [-pi,pi]
@@ -53,8 +55,9 @@ namespace math {
  * @return Returns normalized radian angle in [-pi,pi]
  */
 template<typename T>
-T Normalize(T z) {
-	return std::atan2(std::sin(z), std::cos(z));
+T Normalize(T z)
+{
+    return std::atan2(std::sin(z), std::cos(z));
 };
 
 /**
@@ -64,19 +67,24 @@ T Normalize(T z) {
  * @return Returns angle difference in radians.
  */
 template<typename T>
-inline T AngleDiff(T a, T b) {
-	a = Normalize<T>(a);
-	b = Normalize<T>(b);
-	double d1 = a - b;
-	double d2 = 2.0 * M_PI - std::fabs(d1);
-	if (d1 > 0) {
-		d2 *= -1.0;
-	}
-	if (std::fabs(d1) < std::fabs(d2)) {
-		return d1;
-	} else {
-		return d2;
-	}
+inline T AngleDiff(T a, T b)
+{
+    a = Normalize<T>(a);
+    b = Normalize<T>(b);
+    double d1 = a - b;
+    double d2 = 2.0 * M_PI - std::fabs(d1);
+    if (d1 > 0)
+    {
+        d2 *= -1.0;
+    }
+    if (std::fabs(d1) < std::fabs(d2))
+    {
+        return d1;
+    }
+    else
+    {
+        return d2;
+    }
 };
 
 /**
@@ -88,21 +96,28 @@ inline T AngleDiff(T a, T b) {
 Vec3d CoordAdd(const Vec3d &a, const Vec3d &b);
 
 template<typename T>
-inline T RandomGaussianNum(T cov) {
-	T sigma = std::sqrt(std::abs(cov));
-	T x1, x2, w, r;
-	do {
-		do {
-			r = drand48();
-		} while (r == 0.0);
-		x1 = 2.0 * r - 1.0;
-		do {
-			r = drand48();
-		} while (r == 0.0);
-		x2 = 2.0 * r - 1.0;
-		w = x1 * x1 + x2 * x2;
-	} while (w > 1.0 || w == 0.0);
-	return (sigma * x2 * std::sqrt(-2.0 * std::log(w) / w));
+inline T RandomGaussianNum(T cov)
+{
+    T sigma = std::sqrt(std::abs(cov));
+    T x1, x2, w, r;
+    do
+    {
+        do
+        {
+            r = drand48();
+        }
+        while (r == 0.0);
+        x1 = 2.0 * r - 1.0;
+        do
+        {
+            r = drand48();
+        }
+        while (r == 0.0);
+        x2 = 2.0 * r - 1.0;
+        w = x1 * x1 + x2 * x2;
+    }
+    while (w > 1.0 || w == 0.0);
+    return (sigma * x2 * std::sqrt(-2.0 * std::log(w) / w));
 }
 
 /**
@@ -111,49 +126,66 @@ inline T RandomGaussianNum(T cov) {
  * @return Random double number from the gaussian distribution
  */
 template<typename T>
-inline T RandomGaussianNumByStdDev(T sigma) {
-	T x1, x2, w, r;
-	do {
-		do {
-			r = drand48();
-		} while (r == 0.0);
-		x1 = 2.0 * r - 1.0;
-		do {
-			r = drand48();
-		} while (r == 0.0);
-		x2 = 2.0 * r - 1.0;
-		w = x1 * x1 + x2 * x2;
-	} while (w > 1.0 || w == 0.0);
-	return (sigma * x2 * std::sqrt(-2.0 * std::log(w) / w));
+inline T RandomGaussianNumByStdDev(T sigma)
+{
+    T x1, x2, w, r;
+    do
+    {
+        do
+        {
+            r = drand48();
+        }
+        while (r == 0.0);
+        x1 = 2.0 * r - 1.0;
+        do
+        {
+            r = drand48();
+        }
+        while (r == 0.0);
+        x2 = 2.0 * r - 1.0;
+        w = x1 * x1 + x2 * x2;
+    }
+    while (w > 1.0 || w == 0.0);
+    return (sigma * x2 * std::sqrt(-2.0 * std::log(w) / w));
 };
 
 template<typename T>
-T EuclideanDistance(T x1, T y1, T x2, T y2) {
-	return std::sqrt(std::pow((x1 - x2), 2) + std::pow((y1 - y2), 2));
+T EuclideanDistance(T x1, T y1, T x2, T y2)
+{
+    return std::sqrt(std::pow((x1 - x2), 2) + std::pow((y1 - y2), 2));
 }
 
 template<typename T>
-inline bool Near(T num1, T num2, T bound) {
-	if (num1 > num2 + bound) {
-		return false;
-	} else if (num1 + bound < num2) {
-		return false;
-	} else {
-		return true;
-	}
+inline bool Near(T num1, T num2, T bound)
+{
+    if (num1 > num2 + bound)
+    {
+        return false;
+    }
+    else if (num1 + bound < num2)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
-inline Mat3d MsgCovarianceToMat3d(const boost::array<double, 36> &msg_cov) {
-	Mat3d pose_cov;
-	pose_cov.setZero();
+inline Mat3d MsgCovarianceToMat3d(const boost::array<double, 36> &msg_cov)
+{
+    Mat3d pose_cov;
+    pose_cov.setZero();
 
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < 2; j++) {
-			pose_cov(i, j) = msg_cov[6 * i + j];
-		}
-	}
-	pose_cov(2, 2) = msg_cov[6 * 5 + 5];
-	return pose_cov;
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            pose_cov(i, j) = msg_cov[6 * i + j];
+        }
+    }
+    pose_cov(2, 2) = msg_cov[6 * 5 + 5];
+    return pose_cov;
 }
 
 /**
@@ -164,8 +196,8 @@ inline Mat3d MsgCovarianceToMat3d(const boost::array<double, 36> &msg_cov) {
  * @param vector_d Eigenvalues in vector d
  */
 void EigenDecomposition(const Mat3d &matrix_a,
-						Mat3d &matrix_v,
-						Vec3d &vector_d);
+                        Mat3d &matrix_v,
+                        Vec3d &vector_d);
 
 inline void Tred2(Mat3d &matrix_v, Vec3d &vector_d, Vec3d &vector_e);
 

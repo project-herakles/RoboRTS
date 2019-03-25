@@ -69,53 +69,55 @@
 /**
  * @brief parent class of all local planner algorithms
  */
-namespace roborts_local_planner {
+namespace roborts_local_planner
+{
 
 //! Error info callback function
 typedef boost::function<void (const roborts_common::ErrorInfo &)> ErrorInfoCallback;
-class LocalPlannerBase {
- public:
-  /**
-   * @brief Virtual function calculate robot velocity should be implemented by derived class
-   * @param cmd_vel Velocity use to control robot
-   * @return Error info
-   */
-  virtual roborts_common::ErrorInfo ComputeVelocityCommands(roborts_msgs::TwistAccel &cmd_vel) = 0;
+class LocalPlannerBase
+{
+public:
+    /**
+     * @brief Virtual function calculate robot velocity should be implemented by derived class
+     * @param cmd_vel Velocity use to control robot
+     * @return Error info
+     */
+    virtual roborts_common::ErrorInfo ComputeVelocityCommands(roborts_msgs::TwistAccel &cmd_vel) = 0;
 
-  /**
-   * @brief Virtual function judge if robot reach the goal should be implemented by derived class
-   * @return If true reached the goal, else not
-   */
-  virtual bool IsGoalReached() = 0;
+    /**
+     * @brief Virtual function judge if robot reach the goal should be implemented by derived class
+     * @return If true reached the goal, else not
+     */
+    virtual bool IsGoalReached() = 0;
 
-  /**
-   * @brief Virtual function initialize local planner algorithm should be implemented by derived class
-   * @param local_cost Local cost map
-   * @param tf Tf listener
-   * @param visual Visualize pointer
-   * @return Error info
-   */
-  virtual roborts_common::ErrorInfo Initialize(std::shared_ptr<roborts_costmap::CostmapInterface> local_cost,
-                                             std::shared_ptr<tf::TransformListener> tf, LocalVisualizationPtr visual) = 0;
+    /**
+     * @brief Virtual function initialize local planner algorithm should be implemented by derived class
+     * @param local_cost Local cost map
+     * @param tf Tf listener
+     * @param visual Visualize pointer
+     * @return Error info
+     */
+    virtual roborts_common::ErrorInfo Initialize(std::shared_ptr<roborts_costmap::CostmapInterface> local_cost,
+            std::shared_ptr<tf::TransformListener> tf, LocalVisualizationPtr visual) = 0;
 
-  /**
-   * @brief Virtual function Set global plan's result to local planner or set a goal to local planner
-   * should be implement by derived class
-   * @param plan Result of global planner
-   * @param goal Goal of local planner
-   * @return If true success, else fail
-   */
-  virtual bool SetPlan(const nav_msgs::Path& plan, const geometry_msgs::PoseStamped& goal) = 0;
+    /**
+     * @brief Virtual function Set global plan's result to local planner or set a goal to local planner
+     * should be implement by derived class
+     * @param plan Result of global planner
+     * @param goal Goal of local planner
+     * @return If true success, else fail
+     */
+    virtual bool SetPlan(const nav_msgs::Path& plan, const geometry_msgs::PoseStamped& goal) = 0;
 
-  /**
-   * @brief Virtual function Register error callback function should be implemented by derived class
-   * @param error_callback Callback function
-   */
-  virtual void RegisterErrorCallBack(ErrorInfoCallback error_callback) = 0;
-  virtual ~LocalPlannerBase(){}
+    /**
+     * @brief Virtual function Register error callback function should be implemented by derived class
+     * @param error_callback Callback function
+     */
+    virtual void RegisterErrorCallBack(ErrorInfoCallback error_callback) = 0;
+    virtual ~LocalPlannerBase() {}
 
- protected:
-  LocalPlannerBase () {}
+protected:
+    LocalPlannerBase () {}
 };
 
 typedef boost::shared_ptr<LocalPlannerBase> LocalPlannerPtr;

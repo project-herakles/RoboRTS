@@ -29,36 +29,38 @@
 #include "alg_factory/algorithm_factory.h"
 #include "io/io.h"
 
-namespace roborts_camera {
+namespace roborts_camera
+{
 /**
  * @brief UVC Camera class, product of the camera factory inherited from CameraBase
  */
-class UVCDriver: public CameraBase {
- public:
-  /**
-   * @brief Constructor of UVCDriver
-   * @param camera_info  Information and parameters of camera
-   */
-  explicit UVCDriver(CameraInfo camera_info);
-  /**
-   * @brief Start to read uvc camera
-   * @param img Image data in form of cv::Mat to be read
-   */
-  void StartReadCamera(cv::Mat &img) override;
-  /**
-   * @brief Stop to read uvc camera
-   */
-  void StopReadCamera();
-  ~UVCDriver() override;
- private:
-  /**
-   * @brief Set camera exposure
-   * @param id Camera path
-   * @param val Camera exposure value
-   */
-  void SetCameraExposure(std::string id, int val);
-  //! Initialization of camera read
-  bool read_camera_initialized_;
+class UVCDriver: public CameraBase
+{
+public:
+    /**
+     * @brief Constructor of UVCDriver
+     * @param camera_info  Information and parameters of camera
+     */
+    explicit UVCDriver(CameraInfo camera_info);
+    /**
+     * @brief Start to read uvc camera
+     * @param img Image data in form of cv::Mat to be read
+     */
+    void StartReadCamera(cv::Mat &img) override;
+    /**
+     * @brief Stop to read uvc camera
+     */
+    void StopReadCamera();
+    ~UVCDriver() override;
+private:
+    /**
+     * @brief Set camera exposure
+     * @param id Camera path
+     * @param val Camera exposure value
+     */
+    void SetCameraExposure(std::string id, int val);
+    //! Initialization of camera read
+    bool read_camera_initialized_;
 };
 
 roborts_common::REGISTER_ALGORITHM(CameraBase, "uvc", UVCDriver, CameraInfo);

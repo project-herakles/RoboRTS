@@ -17,14 +17,16 @@
 
 #ifndef RRTS_NODE_STATE_H
 #define RRTS_NODE_STATE_H
-namespace roborts_common{
+namespace roborts_common
+{
 
-enum NodeState{
-  IDLE,
-  RUNNING,
-  PAUSE,
-  SUCCESS,
-  FAILURE
+enum NodeState
+{
+    IDLE,
+    RUNNING,
+    PAUSE,
+    SUCCESS,
+    FAILURE
 };
 } //namespace roborts_common
 

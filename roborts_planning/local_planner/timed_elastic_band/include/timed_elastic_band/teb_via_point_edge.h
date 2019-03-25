@@ -66,31 +66,37 @@
 #include "timed_elastic_band/teb_vertex_pose.h"
 #include "timed_elastic_band/teb_base_eage.h"
 
-namespace roborts_local_planner {
+namespace roborts_local_planner
+{
 
-class ViaPointEdge : public TebUnaryEdgeBase<1, const Eigen::Vector2d *, TebVertexPose> {
- public:
+class ViaPointEdge : public TebUnaryEdgeBase<1, const Eigen::Vector2d *, TebVertexPose>
+{
+public:
 
-  ViaPointEdge() {
-    _measurement = NULL;
-  }
+    ViaPointEdge()
+    {
+        _measurement = NULL;
+    }
 
-  void computeError() {
-    const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
+    void computeError()
+    {
+        const TebVertexPose *bandpt = static_cast<const TebVertexPose *>(_vertices[0]);
 
-    _error[0] = (bandpt->GetPose().GetPosition() - *_measurement).norm();
-  }
+        _error[0] = (bandpt->GetPose().GetPosition() - *_measurement).norm();
+    }
 
-  void SetViaPoint(const Eigen::Vector2d *via_point) {
-    _measurement = via_point;
-  }
+    void SetViaPoint(const Eigen::Vector2d *via_point)
+    {
+        _measurement = via_point;
+    }
 
-  void SetParameters(const Eigen::Vector2d *via_point) {
-    _measurement = via_point;
-  }
+    void SetParameters(const Eigen::Vector2d *via_point)
+    {
+        _measurement = via_point;
+    }
 
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 

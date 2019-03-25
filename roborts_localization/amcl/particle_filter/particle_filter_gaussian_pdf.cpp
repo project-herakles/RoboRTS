@@ -38,33 +38,39 @@
 
 #include "particle_filter_gaussian_pdf.h"
 
-namespace roborts_localization {
+namespace roborts_localization
+{
 
 ParticleFilterGaussianPdf::ParticleFilterGaussianPdf(const Vec3d &mean,
-                                                     const Mat3d &covariance) {
-  this->mean_ = mean;
-  this->covariance_ = covariance;
-  math::EigenDecomposition(this->covariance_, this->covariance_rotation_, this->covariance_diagonal_);
+        const Mat3d &covariance)
+{
+    this->mean_ = mean;
+    this->covariance_ = covariance;
+    math::EigenDecomposition(this->covariance_, this->covariance_rotation_, this->covariance_diagonal_);
 }
 
-Vec3d ParticleFilterGaussianPdf::GenerateSample() {
-  int i = 0;
-  Vec3d random_vec;
-  Vec3d mean_vec;
+Vec3d ParticleFilterGaussianPdf::GenerateSample()
+{
+    int i = 0;
+    Vec3d random_vec;
+    Vec3d mean_vec;
 
-  for (i = 0; i < this->covariance_diagonal_.size(); i++) {
-    double sigma = this->covariance_diagonal_(i);
-    random_vec(i) = math::RandomGaussianNumByStdDev<double>(sigma);
-  }
-
-  for (i = 0; i < this->mean_.size(); i++) {
-    mean_vec(i) = this->mean_(i);
-    for (int j = 0; j < this->mean_.size(); ++j) {
-      mean_vec(i) += this->covariance_rotation_(i, j) * random_vec(j);
+    for (i = 0; i < this->covariance_diagonal_.size(); i++)
+    {
+        double sigma = this->covariance_diagonal_(i);
+        random_vec(i) = math::RandomGaussianNumByStdDev<double>(sigma);
     }
-  }
 
-  return mean_vec;
+    for (i = 0; i < this->mean_.size(); i++)
+    {
+        mean_vec(i) = this->mean_(i);
+        for (int j = 0; j < this->mean_.size(); ++j)
+        {
+            mean_vec(i) += this->covariance_rotation_(i, j) * random_vec(j);
+        }
+    }
+
+    return mean_vec;
 }
 
 }// roborts_localization
