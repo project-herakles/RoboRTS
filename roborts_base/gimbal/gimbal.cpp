@@ -44,7 +44,7 @@ void Gimbal::SDK_Init()
     roborts_sdk::cmd_version_id version_cmd;
     version_cmd.version_id=0;
     auto version = std::make_shared<roborts_sdk::cmd_version_id>(version_cmd);
-    verison_client_->AsyncSendRequest(version,
+    /*verison_client_->AsyncSendRequest(version,
                                       [](roborts_sdk::Client<roborts_sdk::cmd_version_id,
                                          roborts_sdk::cmd_version_id>::SharedFuture future)
     {
@@ -52,7 +52,7 @@ void Gimbal::SDK_Init()
                  <<int(future.get()->version_id>>16&0xFF)<<"."
                  <<int(future.get()->version_id>>8&0xFF)<<"."
                  <<int(future.get()->version_id&0xFF);
-    });
+    });*/
 
     handle_->CreateSubscriber<roborts_sdk::cmd_gimbal_info>(GIMBAL_CMD_SET, CMD_PUSH_GIMBAL_INFO,
             GIMBAL_ADDRESS, BROADCAST_ADDRESS,
@@ -114,15 +114,21 @@ void Gimbal::GimbalInfoCallback(const std::shared_ptr<roborts_sdk::cmd_gimbal_in
 
 }
 
+
+static uint32_t gimbal_ctrl_time = 0;
+
 void Gimbal::GimbalAngleCtrlCallback(const roborts_msgs::GimbalAngle::ConstPtr &msg)
 {
 
     roborts_sdk::cmd_gimbal_angle gimbal_angle;
-    gimbal_angle.ctrl.bit.pitch_mode = msg->pitch_mode;
-    gimbal_angle.ctrl.bit.yaw_mode = msg->yaw_mode;
-    gimbal_angle.pitch = msg->pitch_angle*1800/M_PI;
-    gimbal_angle.yaw = msg->yaw_angle*1800/M_PI;
 
+    gimbal_angle.time = ++gimbal_ctrl_time;
+    gimbal_angle.ctrl_mode = 8;
+    gimbal_angle.pit_ref = msg->pitch_angle * 1800 / M_PI;
+    gimbal_angle.yaw_ref = msg->yaw_angle * 1800 / M_PI;
+    gimbal_angle.tgt_dist = 0.0f;
+    gimbal_angle.x = gimbal_angle.y = gimbal_angle.z = 0.0f;
+    gimbal_angle.visual_valid = 0;
     gimbal_angle_pub_->Publish(gimbal_angle);
 
 }

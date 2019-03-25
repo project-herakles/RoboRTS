@@ -149,17 +149,10 @@ typedef enum
 #define CMD_SET_GIMBAL_ANGLE           (0x03u)
 typedef struct
 {
-    union
-    {
-        uint8_t flag;
-        struct
-        {
-            uint8_t yaw_mode:   1;//0 means absolute, 1 means relative;
-            uint8_t pitch_mode: 1;
-        } bit;
-    } ctrl;
-    int16_t pitch;
-    int16_t yaw;
+    uint32_t time;
+    uint8_t ctrl_mode;
+    float pit_ref, yaw_ref, tgt_dist, x, y, z;
+    uint8_t visual_valid;
 } cmd_gimbal_angle;
 
 #define CMD_SET_FRIC_WHEEL_SPEED       (0X04u)

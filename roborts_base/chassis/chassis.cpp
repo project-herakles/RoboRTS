@@ -42,7 +42,7 @@ void Chassis::SDK_Init()
     roborts_sdk::cmd_version_id version_cmd;
     version_cmd.version_id=0;
     auto version = std::make_shared<roborts_sdk::cmd_version_id>(version_cmd);
-    verison_client_->AsyncSendRequest(version,
+    /*verison_client_->AsyncSendRequest(version,
                                       [](roborts_sdk::Client<roborts_sdk::cmd_version_id,
                                          roborts_sdk::cmd_version_id>::SharedFuture future)
     {
@@ -50,7 +50,7 @@ void Chassis::SDK_Init()
                  <<int(future.get()->version_id>>16&0xFF)<<"."
                  <<int(future.get()->version_id>>8&0xFF)<<"."
                  <<int(future.get()->version_id&0xFF);
-    });
+    });*/
 
     handle_->CreateSubscriber<roborts_sdk::cmd_chassis_info>(CHASSIS_CMD_SET, CMD_PUSH_CHASSIS_INFO,
             CHASSIS_ADDRESS, MANIFOLD2_ADDRESS,

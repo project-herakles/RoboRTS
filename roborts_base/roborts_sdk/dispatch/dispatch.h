@@ -219,14 +219,6 @@ public:
     {
         return cmd_info_;
     }
-    std::shared_ptr<MessageHeader> CreateRequestHeader()
-    {
-        return std::shared_ptr<MessageHeader>(new MessageHeader);
-    }
-
-    virtual std::shared_ptr<void> CreateResponse() = 0;
-    virtual void HandleResponse(std::shared_ptr<MessageHeader> request_header,
-                                std::shared_ptr<void> response) = 0;
 
 protected:
     std::shared_ptr<Handle> handle_;
@@ -254,61 +246,6 @@ public:
         cmd_info_->length = sizeof(Ack);
     }
     ~Client() = default;
-
-    std::shared_ptr<void> CreateResponse()
-    {
-        return std::shared_ptr<void>(new Ack());
-    }
-
-    void HandleResponse(std::shared_ptr<MessageHeader> request_header, std::shared_ptr<void> response)
-    {
-
-        std::unique_lock<std::mutex> lock(pending_requests_mutex_);
-        auto typed_response = std::static_pointer_cast<Ack>(response);
-        //TODO: Determine key: seq_num or session_id
-        uint8_t session_id = request_header->session_id;
-
-        if(pending_requests_.count(session_id) == 0)
-        {
-            LOG_ERROR<<"Received invalid session_id. Ignoring...";
-            return;
-        }
-        auto call_promise = std::get<0>(pending_requests_[session_id]);
-        auto callback = std::get<1>(pending_requests_[session_id]);
-        auto future = std::get<2>(pending_requests_[session_id]);
-        pending_requests_.erase(session_id);
-        // Unlock here to allow the service to be called recursively from one of its callbacks.
-        lock.unlock();
-
-        call_promise->set_value(typed_response);
-        callback(future);
-    }
-
-    SharedFuture
-    AsyncSendRequest(SharedRequest request)
-    {
-        return AsyncSendRequest(request, [](SharedFuture) {});
-    }
-
-    template<typename CallbackType>
-    SharedFuture AsyncSendRequest(SharedRequest request, CallbackType &&cb)
-    {
-        std::lock_guard<std::mutex> lock(pending_requests_mutex_);
-        auto request_header = std::make_shared<MessageHeader>();
-        bool ret = GetHandle()->GetProtocol()->SendRequest(GetCommandInfo().get(), request_header.get(), request.get());
-
-        if (!ret)
-        {
-            LOG_ERROR << "Async_send_request failed!";
-        }
-
-        SharedPromise call_promise = std::make_shared<Promise>();
-        SharedFuture f(call_promise->get_future());
-        //TODO: Determine key: seq_num or session_id
-        pending_requests_[request_header->session_id] = std::make_tuple(call_promise, std::forward<CallbackType>(cb), f);
-
-        return f;
-    }
 
 private:
     //TODO: Determine key: seq_num or session_id

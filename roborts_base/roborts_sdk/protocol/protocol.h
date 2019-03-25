@@ -36,17 +36,10 @@ namespace roborts_sdk
  */
 typedef struct Header
 {
-    uint32_t sof : 8;
-    uint32_t length : 10;
-    uint32_t version : 6;
-    uint32_t session_id : 5;
-    uint32_t is_ack : 1;
-    uint32_t reserved0 : 2; // Always 0
-    uint32_t sender: 8;
-    uint32_t receiver: 8;
-    uint32_t reserved1 : 16;
-    uint32_t seq_num : 16;
-    uint32_t crc : 16;
+    uint8_t sof;
+    uint16_t data_length;
+    uint8_t seq;
+    uint8_t crc8;
 } Header;
 
 /*************************** Package Infomation **********************/
@@ -210,48 +203,6 @@ public:
      */
     void AutoRepeatSendCheck();
     /**
-     * @brief An endless loop for receiving package and push the package into a circular buffer
-     * @details 1. Get the package container,
-     *          2. Check if the pair of command set and id for receiving package exists using a map,
-     *             if not create one circular buffer for this,
-     *          3. Push the package container to the circular buffer
-     *          Dispath layer is interacted with protocol layer
-     *          by the map from the pair of command set and id to circular buffer.
-     */
-    void ReceivePool();
-    /**
-     * @brief An interface function for dispatch layer to take the message/package from the circular buffer in the protocol layer
-     * @param command_info Input expected command information
-     * @param message_header Output message Header
-     * @param message_data Output message data
-     * @return True if the message/package is taken successfully from buffer,
-     *         false if the buffer is empty or
-     *         input command information mismatches the information with the same command set and id already in the circular buffer
-     */
-    bool Take(const CommandInfo *command_info,
-              MessageHeader *message_header,
-              void *message_data);
-    /**
-     * @brief An interface function for dispatch layer to send ack in the protocol layer
-     * @param command_info Input command information
-     * @param message_header Input message header
-     * @param message_data Input message data
-     * @return true if ack is successfully allocated and sent by protocol layer
-     */
-    bool SendResponse(const CommandInfo *command_info,
-                      const MessageHeader *message_header,
-                      void *message_data);
-    /**
-    * @brief An interface function for dispatch layer to send cmd with need for ack in the protocol layer
-    * @param command_info Input command information
-    * @param message_header Get message header
-    * @param message_data Input message data
-    * @return true if command is successfully allocated and sent by protocol layer
-    */
-    bool SendRequest(const CommandInfo *command_info,
-                     MessageHeader *message_header,
-                     void *message_data);
-    /**
     * @brief An interface function for dispatch layer to send cmd without need for ack in the protocol layer
     * @param command_info Input command information
     * @param message_data Input message data
@@ -278,17 +229,6 @@ public:
                  CMDSessionMode session_mode, MessageHeader* message_header = nullptr,
                  std::chrono::milliseconds ack_timeout = std::chrono::milliseconds(50), int retry_time = 5);
     /**
-     * @brief Assign and send ack in the protocol layer
-     * @param session_id Session id for allocate the ack session corresponding to the command session id
-     * @param seq_num sequence number, same with the command package
-     * @param receiver Receiver address, same with the command package sender
-     * @param ack_ptr Pointer for the ack data head address
-     * @param ack_length Length of ack data
-     * @return True if ack is successfully allocated and sent
-     */
-    bool SendACK(uint8_t session_id, uint16_t seq_num, uint8_t receiver,
-                 void *ack_ptr, uint16_t ack_length);
-    /**
      * @brief Use hardware interface in the hardware layer to send the data
      * @param buf pointer for the buffer head
      * @return True if the buffer is successfully sent, blocked to retry connection
@@ -296,92 +236,6 @@ public:
      */
     bool DeviceSend(uint8_t *buf);
 
-    /*************************** Recv Pipline ***************************/
-    /**
-     * @brief Get the byte from the device receive interface into the receive buffer and put it into byte handler, return if a full frame is got
-     * @details Receive process consists of following process
-     *          1. Get the Byte from the device read
-     *          2. Push it into the stream
-     *          3. Verify the stream for the header first.If validated,
-     *             then verify the whole package when stream length equal header->length
-     *          4. If whole package is validated, then get the stream into container handler for package resolving
-     *             to get the receiving container in terms of ack and command
-     *          5. After whole package resolving, prepare the stream for the next loop,
-     *          6. Return the container if resolving successfully
-     * @return Receive Container
-     */
-    RecvContainer *Receive();
-    /**
-     * @brief Input the byte and put it into stream handler with reuse mechanism
-     * @param byte Input byte from Receive()
-     * @return True if a full frame is got
-     */
-    bool ByteHandler(const uint8_t byte);
-    /**
-     * @brief Input the byte from the byte handler, put it into the reuse stream and check if the stream valid for a frame
-     * @param byte Input byte from ByteHandler()
-     * @return True if a full frame is got
-     */
-    bool StreamHandler(uint8_t byte);
-    /**
-     * @brief Check the stream to verify the header and data for the certain length
-     * @return True if a full frame is got
-     */
-    bool CheckStream();
-    /**
-     * @brief Verify if it is a header.
-     * @details Validate the sof, version, receiver, length and header crc. If success, just go ahead. If not, shift the stream
-     * @return True if a full frame is got (Currently always false because there is no header only package)
-     */
-    bool VerifyHeader();
-    /**
-     * @brief Verify if it is a full package.
-     * @details Validate the data crc for whole package. If success, just put it into conatiner handler and then prepare the stream.
-     *          If not, reuse the stream
-     * @return True if a full frame is got
-     */
-    bool VerifyData();
-    /**
-     * @brief Resolve the package from the stream, classify the ack and command, and get the container.
-     * @return True if a full frame is got
-     */
-    bool ContainerHandler();
-
-    /*************************** Stream Management**********************/
-    /**
-     * @brief Prepare the stream to only keep last (header length - 1) data remaining
-     * @details Used after resolving the package and Getting the container
-     */
-    void PrepareStream();
-    /**
-     * @brief Shift the stream to throw the oldest byte in the stream
-     * @details Used after the header is validated failed
-     */
-    void ShiftStream();
-    /**
-     * @brief this function will move the data part to buffer end,
-     * @details head part will move left
-     *          1. there no re-use data
-     *          |------------------------------------------| <= cache
-     *                               ^
-     *                               reuse_index
-     *          [12345678][ data Part ]--------------------| 1. stream_ptr
-     *          [12345678]---------------------[ data Part ] 2. move data to end
-     *          [2345678]----------------------[ data Part ] 3. forward head
-     *          [2345678]------------[ data need to re-use ] 4. final mem layout
-     *
-     *          2. already has re-use data
-     *          |---------------------------------[rev data] <= cache
-     *                          ^
-     *                          reuse_index, the data already used
-     *          [12345678][ data Part ]-----------[rev data] 1. stream_ptr
-     *          [12345678]-----------[ data Part ][rev data] 2. move data to end
-     *          [2345678]------------[ data Part ][rev data] 3. forward head
-     *          [2345678]------------[ data need to re-use ] 4. final mem layout
-     *
-     *          the re-use data will loop later
-     */
-    void ReuseStream();
     /************************ Session Management ***********************/
     /**
      * @brief Setup the command and ack session for initialization
@@ -399,21 +253,11 @@ public:
      * @param session Input the pointer of command session to be freed
      */
     void FreeCMDSession(CMDSession *session);
-    /**
-     * @brief Allocate the ack session
-     * @param receiver Input the receiver address
-     * @param session_id Input the session id
-     * @param size Input the size
-     * @return Pointer of the ack session
-     */
-    ACKSession *AllocACKSession(uint8_t receiver, uint16_t session_id, uint16_t size);
-    /**
-    * @brief Free the ack session
-    * @param session Input the pointer of ack session to be freed
-    */
-    void FreeACKSession(ACKSession *session);
 
     /******************* CRC Calculationns ***************************/
+
+    uint8_t CRC8Calc(const uint8_t *data_ptr, size_t length) { return 0; }
+
     /**
      * @brief Update CRC16
      * @param crc Input CRC16 to be updated
@@ -497,13 +341,6 @@ private:
     CMDSession cmd_session_table_[SESSION_TABLE_NUM];
     //! ack session table
     ACKSession ack_session_table_[RECEIVER_NUM][SESSION_TABLE_NUM - 1];
-
-    //! pointer of receive buffer
-    uint8_t *recv_buff_ptr_;
-    //! read position in the receive buff
-    uint16_t recv_buff_read_pos_;
-    //! length of data read in the receive buffer
-    uint16_t recv_buff_read_len_;
 
     //! whether or not support large data that is larger than length of receive buffer
     bool is_large_data_protocol_;
