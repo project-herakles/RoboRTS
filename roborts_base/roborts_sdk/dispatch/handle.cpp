@@ -40,29 +40,11 @@ bool Handle::Init()
         LOG_ERROR<<"Protocol initialization failed.";
         return false;
     }
-    executor_ = std::make_shared<Executor>(shared_from_this());
     LOG_INFO<<"Initialization of protocol layer and dispatch layer succeeded. ";
     return true;
 }
 std::shared_ptr<Protocol> Handle::GetProtocol()
 {
     return protocol_;
-}
-
-void Handle::Spin()
-{
-
-    for (auto sub :subscription_factory_)
-    {
-        executor_->ExecuteSubscription(sub);
-    }
-    for (auto client :client_factory_)
-    {
-        executor_->ExecuteClient(client);
-    }
-    for (auto service :service_factory_)
-    {
-        executor_->ExecuteService(service);
-    }
 }
 }

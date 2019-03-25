@@ -19,7 +19,6 @@
 #define ROBORTS_SDK_HANDLE_H
 #include "../protocol/protocol.h"
 #include "dispatch.h"
-#include "execution.h"
 
 namespace roborts_sdk
 {
@@ -27,7 +26,6 @@ class SubscriptionBase;
 class PublisherBase;
 class ClientBase;
 class ServiceBase;
-class Executor;
 
 template<typename Cmd>
 class Subscription;
@@ -160,10 +158,6 @@ public:
             std::dynamic_pointer_cast<ClientBase>(client));
         return client;
     }
-    /**
-     * @brief Execute all the handlers to spin the loop
-     */
-    void Spin();
 private:
     //! vector of subsctription base pointers
     std::vector<std::shared_ptr<SubscriptionBase>> subscription_factory_;
@@ -174,8 +168,6 @@ private:
     //! vector of client base pointers
     std::vector<std::shared_ptr<ClientBase>> client_factory_;
 
-    //! executor pointer
-    std::shared_ptr<Executor> executor_;
     //! pointer of hardware layer
     std::shared_ptr<SerialDevice> device_;
     //! pointer of protocol layer

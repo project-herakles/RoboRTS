@@ -35,8 +35,6 @@ int main(int argc, char **argv)
     roborts_base::RefereeSystem referee_system(handle);
     while(ros::ok())
     {
-
-        handle->Spin();
         ros::spinOnce();
         usleep(1000);
     }
