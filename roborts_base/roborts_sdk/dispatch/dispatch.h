@@ -55,17 +55,11 @@ private:
 class SubscriptionBase
 {
 public:
-    SubscriptionBase(std::shared_ptr<Handle> handle,
-                     uint8_t cmd_set, uint8_t cmd_id,
-                     uint8_t sender, uint8_t receiver) :
+    SubscriptionBase(std::shared_ptr<Handle> handle, uint16_t cmd_id) :
         handle_(handle)
     {
         cmd_info_ = std::make_shared<CommandInfo>();
         cmd_info_->cmd_id = cmd_id;
-        cmd_info_->cmd_set = cmd_set;
-        cmd_info_->receiver = receiver;
-        cmd_info_->sender = sender;
-        cmd_info_->need_ack = false;
     }
     ~SubscriptionBase() = default;
     std::shared_ptr<Handle> GetHandle()
@@ -96,11 +90,9 @@ public:
     using SharedMessage = typename std::shared_ptr<Cmd>;
     using CallbackType = typename std::function<void(const SharedMessage)>;
 
-    Subscription(std::shared_ptr<Handle> handle,
-                 uint8_t cmd_set, uint8_t cmd_id,
-                 uint8_t sender, uint8_t receiver,
+    Subscription(std::shared_ptr<Handle> handle, uint16_t cmd_id,
                  CallbackType &&function) :
-        SubscriptionBase(handle, cmd_set, cmd_id, sender, receiver),
+        SubscriptionBase(handle, cmd_id),
         callback_(std::forward<CallbackType>(function))
     {
         cmd_info_->length = sizeof(Cmd);
@@ -122,17 +114,11 @@ private:
 class PublisherBase
 {
 public:
-    PublisherBase(std::shared_ptr<Handle> handle,
-                  uint8_t cmd_set, uint8_t cmd_id,
-                  uint8_t sender, uint8_t receiver) :
+    PublisherBase(std::shared_ptr<Handle> handle, uint16_t cmd_id) :
         handle_(handle)
     {
         cmd_info_ = std::make_shared<CommandInfo>();
         cmd_info_->cmd_id = cmd_id;
-        cmd_info_->cmd_set = cmd_set;
-        cmd_info_->receiver = receiver;
-        cmd_info_->sender = sender;
-        cmd_info_->need_ack = false;
     }
     ~PublisherBase() = default;
     std::shared_ptr<Handle> GetHandle()
@@ -153,10 +139,8 @@ template<typename Cmd>
 class Publisher : public PublisherBase
 {
 public:
-    Publisher(std::shared_ptr<Handle> handle,
-              uint8_t cmd_set, uint8_t cmd_id,
-              uint8_t sender, uint8_t receiver) :
-        PublisherBase(handle, cmd_set, cmd_id, sender, receiver)
+    Publisher(std::shared_ptr<Handle> handle, uint16_t cmd_id) :
+        PublisherBase(handle, cmd_id)
     {
         cmd_info_->length = sizeof(Cmd);
     }
@@ -164,7 +148,7 @@ public:
 
     void Publish(Cmd &message)
     {
-        bool ret = GetHandle()->GetProtocol()->SendMessage(GetCommandInfo().get(), &message);
+        bool ret = GetHandle()->GetProtocol()->Send(GetCommandInfo().get(), &message);
         if (!ret)
         {
             DLOG_ERROR << "send message failed!";

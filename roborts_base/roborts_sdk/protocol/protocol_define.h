@@ -21,27 +21,6 @@ namespace roborts_sdk
 {
 
 #pragma pack(push, 1)
-//DEVICE_ADDRESS
-#define MANIFOLD2_ADDRESS              (0x00u)
-#define CHASSIS_ADDRESS                (0X01u)
-#define GIMBAL_ADDRESS                 (0X02u)
-#define BROADCAST_ADDRESS              (0Xffu)
-
-//CMD_SET
-#define UNIVERSAL_CMD_SET              (0x00u)
-#define REFEREE_SEND_CMD_SET           (0x01u)
-#define CHASSIS_CMD_SET                (0x02u)
-#define GIMBAL_CMD_SET                 (0x03u)
-#define COMPATIBLE_CMD_SET             (0x04u)
-
-
-#define REFEREE_GAME_CMD_SET           (0x40u)
-#define REFEREE_BATTLEFIELD_CMD_SET    (0x41u)
-#define REFEREE_ROBOT_CMD_SET          (0x42u)
-#define REFEREE_RECEIVE_CMD_SET        (0x43u)
-
-#define TEST_CMD_SET                   (0xFFu)
-
 /*----------------------------UNIVERSAL_CMD--- 0x00 ---------------------*/
 #define CMD_HEARTBEAT                  (0x01u)
 typedef struct
@@ -146,7 +125,7 @@ typedef enum
     G_MODE_MAX_NUM,
 } gimbal_mode_e;
 
-#define CMD_SET_GIMBAL_ANGLE           (0x03u)
+#define CMD_ID_GIMBAL_CTRL             (0x00a1u) // icra2018
 typedef struct
 {
     uint32_t time;

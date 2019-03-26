@@ -29,22 +29,23 @@ Gimbal::Gimbal(std::shared_ptr<roborts_sdk::Handle> handle):
 
 Gimbal::~Gimbal()
 {
+    /*
     if(heartbeat_thread_.joinable())
     {
         heartbeat_thread_.join();
     }
+    */
 }
 
 void Gimbal::SDK_Init()
 {
 
-    handle_->CreateSubscriber<roborts_sdk::cmd_gimbal_info>(GIMBAL_CMD_SET, CMD_PUSH_GIMBAL_INFO,
+    /*handle_->CreateSubscriber<roborts_sdk::cmd_gimbal_info>(GIMBAL_CMD_SET, CMD_PUSH_GIMBAL_INFO,
             GIMBAL_ADDRESS, BROADCAST_ADDRESS,
-            std::bind(&Gimbal::GimbalInfoCallback, this, std::placeholders::_1));
+            std::bind(&Gimbal::GimbalInfoCallback, this, std::placeholders::_1));*/
 
-    gimbal_angle_pub_ = handle_->CreatePublisher<roborts_sdk::cmd_gimbal_angle>(GIMBAL_CMD_SET, CMD_SET_GIMBAL_ANGLE,
-                        MANIFOLD2_ADDRESS, GIMBAL_ADDRESS);
-    gimbal_mode_pub_ = handle_->CreatePublisher<roborts_sdk::gimbal_mode_e>(GIMBAL_CMD_SET, CMD_SET_GIMBAL_MODE,
+    gimbal_angle_pub_ = handle_->CreatePublisher<roborts_sdk::cmd_gimbal_angle>(CMD_ID_GIMBAL_CTRL);
+    /*gimbal_mode_pub_ = handle_->CreatePublisher<roborts_sdk::gimbal_mode_e>(GIMBAL_CMD_SET, CMD_SET_GIMBAL_MODE,
                        MANIFOLD2_ADDRESS, GIMBAL_ADDRESS);
     fric_wheel_pub_ = handle_->CreatePublisher<roborts_sdk::cmd_fric_wheel_speed>(GIMBAL_CMD_SET, CMD_SET_FRIC_WHEEL_SPEED,
                       MANIFOLD2_ADDRESS, GIMBAL_ADDRESS);
@@ -63,7 +64,7 @@ void Gimbal::SDK_Init()
             std::this_thread::sleep_for(std::chrono::milliseconds(300));
         }
     }
-                                   );
+                                   );*/
 }
 
 void Gimbal::ROS_Init()
@@ -71,11 +72,12 @@ void Gimbal::ROS_Init()
 
     //ros subscriber
     ros_sub_cmd_gimbal_angle_ = ros_nh_.subscribe("cmd_gimbal_angle", 1, &Gimbal::GimbalAngleCtrlCallback, this);
-
+/*
     //ros service
     ros_gimbal_mode_srv_ = ros_nh_.advertiseService("set_gimbal_mode", &Gimbal::SetGimbalModeService, this);
     ros_ctrl_fric_wheel_srv_ = ros_nh_.advertiseService("cmd_fric_wheel", &Gimbal::CtrlFricWheelService, this);
     ros_ctrl_shoot_srv_ = ros_nh_.advertiseService("cmd_shoot", &Gimbal::CtrlShootService, this);
+    */
     //ros_message_init
     gimbal_tf_.header.frame_id = "base_link";
     gimbal_tf_.child_frame_id = "gimbal";

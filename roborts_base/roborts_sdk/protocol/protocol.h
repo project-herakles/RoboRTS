@@ -49,13 +49,7 @@ typedef struct Header
  */
 typedef struct CommandInfo
 {
-    //! command set for different module, i.e. gimbal, chassis
-    uint8_t cmd_set;
-    //! command id for different commands in the module
-    uint8_t cmd_id;
-    bool need_ack;
-    uint8_t sender;
-    uint8_t receiver;
+    uint16_t cmd_id;
     uint16_t length;
 } CommandInfo;
 
@@ -92,17 +86,6 @@ typedef struct CMDSession
     bool usage_flag;
     //! memory block which holds the package for the command session
     MemoryBlock *memory_block_ptr;
-    //! command set for different module, i.e. gimbal, chassis
-    uint8_t cmd_set;
-    //! command id for different commands in the module
-    uint8_t cmd_id;
-
-    //! times already retry sending
-    uint16_t sent;
-    //! times need to retry sending in total
-    uint16_t retry_time;
-    //! last sequence number
-    uint32_t pre_seq_num;
 } CMDSession;
 
 
@@ -128,26 +111,14 @@ public:
      * @return True if success
      */
     bool Init();
+    /*************************** Send Pipline ***************************/
     /**
     * @brief An interface function for dispatch layer to send cmd without need for ack in the protocol layer
     * @param command_info Input command information
     * @param message_data Input message data
     * @return True if command is successfully allocated and sent by protocol layer
     */
-    bool SendMessage(const CommandInfo *command_info,
-                     void *message_data);
-    /*************************** Send Pipline ***************************/
-    /**
-     * @brief Assign and send command in the protocol layer
-     * @param cmd_set Command set for different modules
-     * @param cmd_id  Command id for different commands
-     * @param receiver Receiver address
-     * @param data_ptr Pointer for the data head address
-     * @param data_length Length of data
-     * @return True if command is successfully allocated and sent
-     */
-    bool SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
-                 void *data_ptr, uint16_t data_length);
+    bool Send(const CommandInfo *command_info, void *message_data);
     /**
      * @brief Use hardware interface in the hardware layer to send the data
      * @param buf pointer for the buffer head

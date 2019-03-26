@@ -60,21 +60,15 @@ public:
     /**
      * @brief Create the subscriber for the protocol command without need of ack (Receive command)
      * @tparam Cmd Command DataType
-     * @param cmd_set Command set for different module, i.e. gimbal, chassis
      * @param cmd_id Command id for different commands in the module
-     * @param sender Sender address
-     * @param receiver Receiver address
      * @param function Subscriber Callback function
      * @return Pointer of subscription handle
      */
     template<typename Cmd>
-    std::shared_ptr<Subscription<Cmd>> CreateSubscriber(uint8_t cmd_set, uint8_t cmd_id,
-                                    uint8_t sender, uint8_t receiver,
+    std::shared_ptr<Subscription<Cmd>> CreateSubscriber(uint16_t cmd_id,
                                     typename Subscription<Cmd>::CallbackType &&function)
     {
-        auto subscriber = std::make_shared<Subscription<Cmd>>(shared_from_this(),
-                          cmd_set, cmd_id,
-                          sender, receiver,
+        auto subscriber = std::make_shared<Subscription<Cmd>>(shared_from_this(), cmd_id,
                           std::forward<typename Subscription<Cmd>::CallbackType>(
                               function));
         subscription_factory_.push_back(
@@ -84,18 +78,13 @@ public:
     /**
      * @brief Create the publisher for the protocol command without need of ack (Send command)
      * @tparam Cmd Command DataType
-     * @param cmd_set Command set for different module, i.e. gimbal, chassis
      * @param cmd_id Command id for different commands in the module
-     * @param sender Sender address
-     * @param receiver Receiver address
      * @return Pointer of publisher handle
      */
     template<typename Cmd>
-    std::shared_ptr<Publisher<Cmd>> CreatePublisher(uint8_t cmd_set, uint8_t cmd_id, uint8_t sender, uint8_t receiver)
+    std::shared_ptr<Publisher<Cmd>> CreatePublisher(uint16_t cmd_id)
     {
-        auto publisher = std::make_shared<Publisher<Cmd>>(shared_from_this(),
-                         cmd_set, cmd_id,
-                         sender, receiver);
+        auto publisher = std::make_shared<Publisher<Cmd>>(shared_from_this(), cmd_id);
         publisher_factory_.push_back(
             std::dynamic_pointer_cast<PublisherBase>(publisher));
         return publisher;

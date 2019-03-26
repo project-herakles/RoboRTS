@@ -15,9 +15,7 @@ catkin_package()
 
 add_executable(roborts_base_node
   roborts_base_node.cpp
-  chassis/chassis.cpp
   gimbal/gimbal.cpp
-  referee_system/referee_system.cpp
   roborts_sdk/utilities/crc.c
   roborts_sdk/dispatch/handle.cpp
   roborts_sdk/protocol/protocol.cpp
