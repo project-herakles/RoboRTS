@@ -108,7 +108,7 @@ bool Protocol::Send(const CommandInfo *command_info, void *data_ptr)
     memcpy(cmd_session.memory_block_ptr->memory_ptr + pack_length - CRC_DATA_LEN, &crc_data, CRC_DATA_LEN);
 
     // send it using device
-    DeviceSend(cmd_session.memory_block_ptr->memory_ptr);
+    DeviceSend(cmd_session.memory_block_ptr->memory_ptr, pack_length);
 
     seq_num_++;
 
@@ -120,26 +120,20 @@ bool Protocol::Send(const CommandInfo *command_info, void *data_ptr)
     return true;
 }
 
-bool Protocol::DeviceSend(uint8_t *buf)
+bool Protocol::DeviceSend(uint8_t *buf, const uint16_t pack_length)
 {
-    int ans;
-    Header *header_ptr = (Header *) buf;
-
-// For debug and visualzation:
-// ans = header_ptr->length;
     printf("Transmitting [ ");
-    for(int i = 0; i < header_ptr->data_length; i++)
+    for(int i = 0; i < pack_length; i++)
         printf("%02x ", buf[i]);
     printf("]\n");
-    ans = serial_device_ptr_->Write(buf, header_ptr->data_length);
-
-    if (ans <= 0)
+    int ret = serial_device_ptr_->Write(buf, pack_length);
+    if (ret <= 0)
     {
         DLOG_ERROR << "Port failed.";
     }
-    else if (ans != header_ptr->data_length)
+    else if (ret != pack_length)
     {
-        DLOG_ERROR << "Port send failed, send length:" << ans << "package length" << header_ptr->data_length;
+        DLOG_ERROR << "Transmission incomplete, " << ret << " of " << pack_length << " bytes sent";
     }
     else
     {
@@ -148,6 +142,5 @@ bool Protocol::DeviceSend(uint8_t *buf)
     }
     return false;
 }
-
 
 }

@@ -76,7 +76,8 @@ uint8_t CRC8Calc(uint8_t* pchMessage, uint16_t dwLength)
 
 uint16_t CRC16Calc(uint8_t* pchMessage, uint16_t dwLength)
 {
-    uint8_t chData, wCRC = CRC_INIT;
+    uint8_t chData;
+    uint16_t wCRC = CRC_INIT;
     if (pchMessage == NULL)
     {
         return 0xFFFF;

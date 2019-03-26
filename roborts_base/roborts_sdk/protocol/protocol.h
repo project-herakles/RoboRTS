@@ -34,13 +34,15 @@ namespace roborts_sdk
 /**
  * @brief Package header used to resolve package
  */
+#pragma pack(push, 1)
 typedef struct Header
 {
-    uint8_t sof;
-    uint16_t data_length;
-    uint8_t seq;
-    uint8_t crc8;
+    uint8_t sof : 8;
+    uint16_t data_length : 16;
+    uint8_t seq : 8;
+    uint8_t crc8 : 8;
 } Header;
+#pragma pack(pop)
 
 /*************************** Package Infomation **********************/
 /**
@@ -125,7 +127,7 @@ public:
      * @return True if the buffer is successfully sent, blocked to retry connection
      *         if the hardware device is disconnected after connection.
      */
-    bool DeviceSend(uint8_t *buf);
+    bool DeviceSend(uint8_t *buf, const uint16_t pack_length);
 
     /************************ Session Management ***********************/
     /**
@@ -151,13 +153,7 @@ public:
     static const size_t CMD_ID_LEN = sizeof(uint16_t);
 
     //! SOF
-    static const uint8_t SOF = 0xAA;
-    //! version
-    static const uint8_t VERSION = 0x00;
-    //! local device address
-    static const uint8_t DEVICE = 0x00;
-    //! max number of receiver address
-    static const uint8_t RECEIVER_NUM = 6;
+    static const uint8_t SOF = 0xA0;
 
 private:
     //! shared pointer of serial device
