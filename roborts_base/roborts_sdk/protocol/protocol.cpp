@@ -112,7 +112,7 @@ bool Protocol::SendCMD(uint8_t cmd_set, uint8_t, uint8_t,
     //pack into cmd_session memory_block
     header_ptr = (Header *) cmd_session.memory_block_ptr->memory_ptr;
     header_ptr->sof = SOF;
-    header_ptr->data_length = pack_length;
+    header_ptr->data_length = data_length;
     header_ptr->seq = seq_num_;
     header_ptr->crc8 = CRC8Calc(cmd_session.memory_block_ptr->memory_ptr, HEADER_LEN - CRC_HEAD_LEN);
 
