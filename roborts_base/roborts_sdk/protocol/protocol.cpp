@@ -24,9 +24,7 @@ namespace roborts_sdk
 
 Protocol::Protocol(std::shared_ptr<SerialDevice> serial_device_ptr) :
     running_(false),
-    serial_device_ptr_(serial_device_ptr), seq_num_(0),
-    is_large_data_protocol_(true), reuse_buffer_(true),
-    poll_tick_(10)
+    serial_device_ptr_(serial_device_ptr), seq_num_(0)
 {
 
 }
@@ -34,10 +32,6 @@ Protocol::Protocol(std::shared_ptr<SerialDevice> serial_device_ptr) :
 Protocol::~Protocol()
 {
     running_ = false;
-    if (send_poll_thread_.joinable())
-    {
-        send_poll_thread_.join();
-    }
 }
 
 bool Protocol::Init()
@@ -53,168 +47,34 @@ bool Protocol::Init()
     memory_pool_ptr_->Init();
     SetupSession();
     running_ = true;
-    send_poll_thread_ = std::thread(&Protocol::AutoRepeatSendCheck, this);
     return true;
-}
-
-void Protocol::AutoRepeatSendCheck()
-{
-    while (running_)
-    {
-        unsigned int i;
-
-        std::chrono::steady_clock::time_point current_time_stamp;
-
-        for (i = 1; i < SESSION_TABLE_NUM; i++)
-        {
-
-            if (cmd_session_table_[i].usage_flag == 1)
-            {
-                current_time_stamp = std::chrono::steady_clock::now();
-                if ((std::chrono::duration_cast<std::chrono::milliseconds>
-                        (current_time_stamp - cmd_session_table_[i].pre_time_stamp) >
-                        cmd_session_table_[i].ack_timeout))
-                {
-
-                    memory_pool_ptr_->LockMemory();
-                    if (cmd_session_table_[i].retry_time > 0)
-                    {
-
-                        if (cmd_session_table_[i].sent >= cmd_session_table_[i].retry_time)
-                        {
-                            LOG_ERROR << "Sending timeout, Free session "
-                                      << static_cast<int>(cmd_session_table_[i].session_id);
-                            FreeCMDSession(&cmd_session_table_[i]);
-                        }
-                        else
-                        {
-                            LOG_ERROR << "Retry session "
-                                      << static_cast<int>(cmd_session_table_[i].session_id);
-                            DeviceSend(cmd_session_table_[i].memory_block_ptr->memory_ptr);
-                            cmd_session_table_[i].pre_time_stamp = current_time_stamp;
-                            cmd_session_table_[i].sent++;
-                        }
-                    }
-                    else
-                    {
-                        DLOG_ERROR << "Send once " << i;
-                        DeviceSend(cmd_session_table_[i].memory_block_ptr->memory_ptr);
-                        cmd_session_table_[i].pre_time_stamp = current_time_stamp;
-                    }
-                    memory_pool_ptr_->UnlockMemory();
-                }
-                else
-                {
-//        DLOG_INFO<<"Wait for timeout Session: "<< i;
-                }
-            }
-        }
-        usleep(1000);
-    }
 }
 
 bool Protocol::SendMessage(const CommandInfo *command_info,
                            void *message_data)
 {
     return SendCMD(command_info->cmd_set, command_info->cmd_id,
-                   command_info->receiver, message_data, command_info->length,
-                   CMDSessionMode::CMD_SESSION_0);
+                   command_info->receiver, message_data, command_info->length);
 }
 
 /*************************** Session Management **************************/
 void Protocol::SetupSession()
 {
-    uint8_t i, j;
-    for (i = 0; i < SESSION_TABLE_NUM; i++)
-    {
-        cmd_session_table_[i].session_id = i;
-        cmd_session_table_[i].usage_flag = false;
-        cmd_session_table_[i].memory_block_ptr = nullptr;
-    }
-
-    for (i = 0; i < RECEIVER_NUM; i++)
-    {
-        for (j = 0; j < (SESSION_TABLE_NUM - 1); j++)
-        {
-            ack_session_table_[i][j].session_id = j + 1;
-            ack_session_table_[i][j].session_status = ACKSessionStatus::ACK_SESSION_IDLE;
-            ack_session_table_[i][j].memory_block_ptr = nullptr;
-        }
-    }
+    cmd_session.session_id = 0;
+    cmd_session.usage_flag = false;
+    cmd_session.memory_block_ptr = nullptr;
 }
-
-CMDSession *Protocol::AllocCMDSession(CMDSessionMode session_mode, uint16_t size)
-{
-    uint32_t i;
-    MemoryBlock *memory_block_ptr = nullptr;
-
-    if (session_mode == CMDSessionMode::CMD_SESSION_0 || session_mode == CMDSessionMode::CMD_SESSION_1)
-    {
-        if (cmd_session_table_[(uint16_t) session_mode].usage_flag == 0)
-        {
-            i = static_cast<uint32_t>(session_mode);
-        }
-        else
-        {
-            DLOG_ERROR << "session " << static_cast<uint32_t>(session_mode) << " is busy\n";
-            return nullptr;
-        }
-    }
-    else
-    {
-        for (i = 2; i < SESSION_TABLE_NUM; i++)
-        {
-            if (cmd_session_table_[i].usage_flag == 0)
-            {
-                break;
-            }
-        }
-
-    }
-
-    if (i < 32 && cmd_session_table_[i].usage_flag == 0)
-    {
-
-        cmd_session_table_[i].usage_flag = 1;
-        memory_block_ptr = memory_pool_ptr_->AllocMemory(size);
-        if (memory_block_ptr == nullptr)
-        {
-            cmd_session_table_[i].usage_flag = 0;
-        }
-        else
-        {
-//      DLOG_INFO<<"find "<<i;
-            cmd_session_table_[i].memory_block_ptr = memory_block_ptr;
-            return &cmd_session_table_[i];
-        }
-    }
-    else
-    {
-        DLOG_INFO << "All usable CMD session id are occupied";
-    }
-
-    return nullptr;
-}
-
-void Protocol::FreeCMDSession(CMDSession *session_ptr)
-{
-    if (session_ptr->usage_flag == 1)
-    {
-        memory_pool_ptr_->FreeMemory(session_ptr->memory_block_ptr);
-        session_ptr->usage_flag = 0;
-    }
-}
-
 
 /****************************** Send Pipline *****************************/
 bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
-                       void *data_ptr, uint16_t data_length,
-                       CMDSessionMode session_mode, MessageHeader* message_header,
-                       std::chrono::milliseconds ack_timeout, int retry_time)
+                       void *data_ptr, uint16_t data_length)
 {
-    if(cmd_set != CMD_SET_GIMBAL_ANGLE) return false;
+    if(cmd_set != CMD_SET_GIMBAL_ANGLE)
+    {
+        DLOG_ERROR << "Non CMD_GIMBAL_ANGEL transmitted";
+        return false;
+    }
 
-    CMDSession *cmd_session_ptr = nullptr;
     Header *header_ptr = nullptr;
     uint8_t cmd_set_prefix[] = {cmd_id, cmd_set};
     uint32_t crc_data;
@@ -232,59 +92,50 @@ bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
                   CMD_SET_PREFIX_LEN +
                   data_length + CRC_DATA_LEN;
 
-    //second get the param into the session
-    switch (session_mode)
+    //lock
+    memory_pool_ptr_->LockMemory();
+
+    //alloc session
+    if (cmd_session.usage_flag)
     {
-
-    case CMDSessionMode::CMD_SESSION_0:
-        //lock
-        memory_pool_ptr_->LockMemory();
-        cmd_session_ptr = AllocCMDSession(CMDSessionMode::CMD_SESSION_0, pack_length);
-
-        if (cmd_session_ptr == nullptr)
-        {
-            //unlock
-            memory_pool_ptr_->UnlockMemory();
-            DLOG_ERROR << "Allocate CMD session failed.";
-            return false;
-        }
-
-        //pack into cmd_session memory_block
-        header_ptr = (Header *) cmd_session_ptr->memory_block_ptr->memory_ptr;
-        header_ptr->sof = SOF;
-        header_ptr->data_length = pack_length;
-        header_ptr->seq = seq_num_;
-        header_ptr->crc8 = CRC8Calc(cmd_session_ptr->memory_block_ptr->memory_ptr, HEADER_LEN - CRC_HEAD_LEN);
-
-        if(message_header)
-        {
-            message_header->is_ack = false;
-            message_header->seq_num = seq_num_;
-            message_header->session_id = cmd_session_ptr->session_id;
-        }
-
-        // pack the cmd prefix ,data and data crc into memory block one by one
-        memcpy(cmd_session_ptr->memory_block_ptr->memory_ptr + HEADER_LEN, cmd_set_prefix, CMD_SET_PREFIX_LEN);
-        memcpy(cmd_session_ptr->memory_block_ptr->memory_ptr + HEADER_LEN + CMD_SET_PREFIX_LEN, data_ptr, data_length);
-
-        crc_data = CRC32Calc(cmd_session_ptr->memory_block_ptr->memory_ptr, pack_length - CRC_DATA_LEN);
-        memcpy(cmd_session_ptr->memory_block_ptr->memory_ptr + pack_length - CRC_DATA_LEN, &crc_data, CRC_DATA_LEN);
-
-        // send it using device
-        DeviceSend(cmd_session_ptr->memory_block_ptr->memory_ptr);
-
-        seq_num_++;
-        FreeCMDSession(cmd_session_ptr);
-        //unlock
         memory_pool_ptr_->UnlockMemory();
-        break;
-    default:
-        //DLOG_ERROR << "session mode is not valid";
+        DLOG_ERROR << "TX occupied";
         return false;
     }
 
-    return true;
+    if((cmd_session.memory_block_ptr = memory_pool_ptr_->AllocMemory(pack_length)) == nullptr)
+    {
+        memory_pool_ptr_->UnlockMemory();
+        DLOG_ERROR << "TX memory allocation failed";
+        return false;
+    }
+    cmd_session.usage_flag = true;
 
+    //pack into cmd_session memory_block
+    header_ptr = (Header *) cmd_session.memory_block_ptr->memory_ptr;
+    header_ptr->sof = SOF;
+    header_ptr->data_length = pack_length;
+    header_ptr->seq = seq_num_;
+    header_ptr->crc8 = CRC8Calc(cmd_session.memory_block_ptr->memory_ptr, HEADER_LEN - CRC_HEAD_LEN);
+
+    // pack the cmd prefix ,data and data crc into memory block one by one
+    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN, cmd_set_prefix, CMD_SET_PREFIX_LEN);
+    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN + CMD_SET_PREFIX_LEN, data_ptr, data_length);
+
+    crc_data = 0; //CRC16Calc(cmd_session.memory_block_ptr->memory_ptr, pack_length - CRC_DATA_LEN);
+    memcpy(cmd_session.memory_block_ptr->memory_ptr + pack_length - CRC_DATA_LEN, &crc_data, CRC_DATA_LEN);
+
+    // send it using device
+    DeviceSend(cmd_session.memory_block_ptr->memory_ptr);
+
+    seq_num_++;
+
+    memory_pool_ptr_->FreeMemory(cmd_session.memory_block_ptr);
+    cmd_session.usage_flag = false;
+
+    //unlock
+    memory_pool_ptr_->UnlockMemory();
+    return true;
 }
 
 bool Protocol::DeviceSend(uint8_t *buf)
@@ -317,77 +168,4 @@ bool Protocol::DeviceSend(uint8_t *buf)
 }
 
 
-/*************************** CRC Calculationns ****************************/
-uint16_t Protocol::CRC16Update(uint16_t crc, uint8_t ch)
-{
-    uint16_t tmp;
-    uint16_t msg;
-
-    msg = 0x00ff & static_cast<uint16_t>(ch);
-    tmp = crc ^ msg;
-    crc = (crc >> 8) ^ crc_tab16[tmp & 0xff];
-
-    return crc;
-}
-
-uint32_t Protocol::CRC32Update(uint32_t crc, uint8_t ch)
-{
-    uint32_t tmp;
-    uint32_t msg;
-
-    msg = 0x000000ffL & static_cast<uint32_t>(ch);
-    tmp = crc ^ msg;
-    crc = (crc >> 8) ^ crc_tab32[tmp & 0xff];
-    return crc;
-}
-
-uint16_t Protocol::CRC16Calc(const uint8_t *data_ptr, size_t length)
-{
-    size_t i;
-    uint16_t crc = CRC_INIT;
-
-    for (i = 0; i < length; i++)
-    {
-        crc = CRC16Update(crc, data_ptr[i]);
-    }
-
-    return crc;
-}
-
-uint32_t Protocol::CRC32Calc(const uint8_t *data_ptr, size_t length)
-{
-    size_t i;
-    uint32_t crc = CRC_INIT;
-
-    for (i = 0; i < length; i++)
-    {
-        crc = CRC32Update(crc, data_ptr[i]);
-    }
-
-    return crc;
-}
-
-bool Protocol::CRCHeadCheck(uint8_t *data_ptr, size_t length)
-{
-    if (CRC16Calc(data_ptr, length) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Protocol::CRCTailCheck(uint8_t *data_ptr, size_t length)
-{
-    if (CRC32Calc(data_ptr, length) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 }
