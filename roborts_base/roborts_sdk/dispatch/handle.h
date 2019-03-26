@@ -24,17 +24,11 @@ namespace roborts_sdk
 {
 class SubscriptionBase;
 class PublisherBase;
-class ClientBase;
-class ServiceBase;
 
 template<typename Cmd>
 class Subscription;
 template<typename Cmd>
 class Publisher;
-template<typename Cmd, typename Ack>
-class Client;
-template<typename Cmd, typename Ack>
-class Service;
 /**
  * @brief Handle class in the dispatch layer
  */
@@ -48,12 +42,6 @@ public:
     template<typename Cmd>
     friend
     class Publisher;
-    template<typename Cmd, typename Ack>
-    friend
-    class Client;
-    template<typename Cmd, typename Ack>
-    friend
-    class Service;
     /**
      * @brief Constructor of Handle, instantiate the object of the hardware layer and protocol layer
      * @param serial_port
@@ -112,61 +100,11 @@ public:
             std::dynamic_pointer_cast<PublisherBase>(publisher));
         return publisher;
     }
-    /**
-     * @brief Create the service for the protocol command with need of ack (Receive command and send ack)
-     * @tparam Cmd Command DataType
-     * @tparam Ack Ack DataType
-     * @param cmd_set Command set for different module, i.e. gimbal, chassis
-     * @param cmd_id Command id for different commands in the module
-     * @param sender Sender address
-     * @param receiver Receiver address
-     * @param function Server Callback function (Input command and output ack)
-     * @return Pointer of service handle
-     */
-    template<typename Cmd, typename Ack>
-    std::shared_ptr<Service<Cmd, Ack>> CreateServer(uint8_t cmd_set, uint8_t cmd_id,
-                                    uint8_t sender, uint8_t receiver,
-                                    typename Service<Cmd, Ack>::CallbackType &&function)
-    {
-        auto service = std::make_shared<Service<Cmd, Ack>>(shared_from_this(),
-                       cmd_set, cmd_id,
-                       sender, receiver,
-                       std::forward<typename Service<Cmd,
-                       Ack>::CallbackType>(function));
-        service_factory_.push_back(
-            std::dynamic_pointer_cast<ServiceBase>(service));
-        return service;
-    }
-    /**
-     * @brief Create the client for the protocol command with need of ack (Send command and wait for ack)
-     * @tparam Cmd Command DataType
-     * @tparam Ack Ack DataType
-     * @param cmd_set Command set for different module, i.e. gimbal, chassis
-     * @param cmd_id Command id for different commands in the module
-     * @param sender Sender address
-     * @param receiver Receiver address
-     * @return Pointer of client handle
-     */
-    template<typename Cmd, typename Ack>
-    std::shared_ptr<Client<Cmd, Ack>> CreateClient(uint8_t cmd_set, uint8_t cmd_id,
-                                   uint8_t sender, uint8_t receiver)
-    {
-        auto client = std::make_shared<Client<Cmd, Ack>>(shared_from_this(),
-                      cmd_set, cmd_id,
-                      sender, receiver);
-        client_factory_.push_back(
-            std::dynamic_pointer_cast<ClientBase>(client));
-        return client;
-    }
 private:
     //! vector of subsctription base pointers
     std::vector<std::shared_ptr<SubscriptionBase>> subscription_factory_;
     //! vector of publisher base pointers
     std::vector<std::shared_ptr<PublisherBase>> publisher_factory_;
-    //! vector of service base pointers
-    std::vector<std::shared_ptr<ServiceBase>> service_factory_;
-    //! vector of client base pointers
-    std::vector<std::shared_ptr<ClientBase>> client_factory_;
 
     //! pointer of hardware layer
     std::shared_ptr<SerialDevice> device_;

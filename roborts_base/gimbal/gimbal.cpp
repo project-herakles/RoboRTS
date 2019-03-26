@@ -38,22 +38,6 @@ Gimbal::~Gimbal()
 void Gimbal::SDK_Init()
 {
 
-    verison_client_ = handle_->CreateClient<roborts_sdk::cmd_version_id,roborts_sdk::cmd_version_id>
-                      (UNIVERSAL_CMD_SET, CMD_REPORT_VERSION,
-                       MANIFOLD2_ADDRESS, GIMBAL_ADDRESS);
-    roborts_sdk::cmd_version_id version_cmd;
-    version_cmd.version_id=0;
-    auto version = std::make_shared<roborts_sdk::cmd_version_id>(version_cmd);
-    /*verison_client_->AsyncSendRequest(version,
-                                      [](roborts_sdk::Client<roborts_sdk::cmd_version_id,
-                                         roborts_sdk::cmd_version_id>::SharedFuture future)
-    {
-        LOG_INFO << "Gimbal Firmware Version: " << int(future.get()->version_id>>24&0xFF) <<"."
-                 <<int(future.get()->version_id>>16&0xFF)<<"."
-                 <<int(future.get()->version_id>>8&0xFF)<<"."
-                 <<int(future.get()->version_id&0xFF);
-    });*/
-
     handle_->CreateSubscriber<roborts_sdk::cmd_gimbal_info>(GIMBAL_CMD_SET, CMD_PUSH_GIMBAL_INFO,
             GIMBAL_ADDRESS, BROADCAST_ADDRESS,
             std::bind(&Gimbal::GimbalInfoCallback, this, std::placeholders::_1));
