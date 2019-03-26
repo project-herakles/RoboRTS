@@ -2,12 +2,13 @@
 
 ## Start-up Procedure
 
-In workspace, 
-
+In workspace, boot ROS by
 ```bash
-roslaunch roborts_bringup base.launch
-rosrun roborts_camera roborts_camera_node
-rosrun roborts_detection armor_detection_node
+roslaunch roborts_bringup trial.launch
+```
+
+and launch armor detection debugging interface by
+```bash
 rosrun roborts_detection armor_detection_client
 ```
 
