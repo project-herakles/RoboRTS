@@ -162,10 +162,6 @@ public:
      */
     void SetupSession();
 
-    /******************* CRC Calculationns ***************************/
-
-    uint8_t CRC8Calc(const uint8_t *data_ptr, size_t length) { return 0; }
-
     /******************* Const List ***************************/
 
     //! size of receive buffer used to read from hardware device
@@ -176,12 +172,12 @@ public:
     static const size_t SESSION_TABLE_NUM = 32;
     //! length of header
     static const size_t HEADER_LEN = sizeof(Header);
+    //! length of CRC8
+    static const size_t CRC_HEAD_LEN = sizeof(uint8_t);
     //! length of CRC16
-    static const size_t CRC_HEAD_LEN = sizeof(uint16_t);
-    //! length of CRC32
-    static const size_t CRC_DATA_LEN = sizeof(uint32_t);
-    //! length of the pair of command id and command set
-    static const size_t CMD_SET_PREFIX_LEN = 2 * sizeof(uint8_t);
+    static const size_t CRC_DATA_LEN = sizeof(uint16_t);
+    //! length of CMD_ID as in icra2018
+    static const size_t CMD_ID_LEN = sizeof(uint16_t);
 
     //! SOF
     static const uint8_t SOF = 0xAA;

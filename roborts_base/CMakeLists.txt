@@ -18,6 +18,7 @@ add_executable(roborts_base_node
   chassis/chassis.cpp
   gimbal/gimbal.cpp
   referee_system/referee_system.cpp
+  roborts_sdk/utilities/crc.c
   roborts_sdk/dispatch/handle.cpp
   roborts_sdk/protocol/protocol.cpp
   roborts_sdk/hardware/serial_device.cpp

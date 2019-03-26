@@ -66,7 +66,7 @@ void Protocol::SetupSession()
 }
 
 /****************************** Send Pipline *****************************/
-bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
+bool Protocol::SendCMD(uint8_t cmd_set, uint8_t, uint8_t,
                        void *data_ptr, uint16_t data_length)
 {
     if(cmd_set != CMD_SET_GIMBAL_ANGLE)
@@ -76,11 +76,10 @@ bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
     }
 
     Header *header_ptr = nullptr;
-    uint8_t cmd_set_prefix[] = {cmd_id, cmd_set};
-    uint32_t crc_data;
+    uint8_t cmd_id[2] = {0x00, 0xa1}; // CMD_ID for gimbal angle in icra2018
+    uint16_t crc_data;
 
     uint16_t pack_length = 0;
-
 
     //calculate pack_length first
     if (data_length == 0 || data_ptr == nullptr)
@@ -88,9 +87,8 @@ bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
         DLOG_ERROR << "No data send.";
         return false;
     }
-    pack_length = HEADER_LEN +
-                  CMD_SET_PREFIX_LEN +
-                  data_length + CRC_DATA_LEN;
+    // As icra2018 protocol: Header -> cmd_id(16b) -> payload_len -> payload_crc16
+    pack_length = HEADER_LEN + CMD_ID_LEN + data_length + CRC_DATA_LEN;
 
     //lock
     memory_pool_ptr_->LockMemory();
@@ -119,10 +117,10 @@ bool Protocol::SendCMD(uint8_t cmd_set, uint8_t cmd_id, uint8_t receiver,
     header_ptr->crc8 = CRC8Calc(cmd_session.memory_block_ptr->memory_ptr, HEADER_LEN - CRC_HEAD_LEN);
 
     // pack the cmd prefix ,data and data crc into memory block one by one
-    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN, cmd_set_prefix, CMD_SET_PREFIX_LEN);
-    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN + CMD_SET_PREFIX_LEN, data_ptr, data_length);
+    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN, cmd_id, CMD_ID_LEN);
+    memcpy(cmd_session.memory_block_ptr->memory_ptr + HEADER_LEN + CMD_ID_LEN, data_ptr, data_length);
 
-    crc_data = 0; //CRC16Calc(cmd_session.memory_block_ptr->memory_ptr, pack_length - CRC_DATA_LEN);
+    crc_data = CRC16Calc(cmd_session.memory_block_ptr->memory_ptr, pack_length - CRC_DATA_LEN);
     memcpy(cmd_session.memory_block_ptr->memory_ptr + pack_length - CRC_DATA_LEN, &crc_data, CRC_DATA_LEN);
 
     // send it using device
