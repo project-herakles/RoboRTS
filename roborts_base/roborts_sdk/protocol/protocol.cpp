@@ -127,10 +127,10 @@ bool Protocol::DeviceSend(uint8_t *buf)
 
 // For debug and visualzation:
 // ans = header_ptr->length;
-//  for(int i =0;i<header_ptr->length;i++){
-//    printf("send_byte %d:\t %X\n ", i, buf[i]);
-//  }
-//  std::cout<<"----------------"<<std::endl;
+    printf("Transmitting [ ");
+    for(int i = 0; i < header_ptr->data_length; i++)
+        printf("%02x ", buf[i]);
+    printf("]\n");
     ans = serial_device_ptr_->Write(buf, header_ptr->data_length);
 
     if (ans <= 0)
