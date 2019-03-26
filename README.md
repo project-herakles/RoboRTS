@@ -2,14 +2,9 @@
 
 ## Start-up Procedure
 
-In workspace, boot ROS by
+Boot ROS by invoking the following command in ROS workspace
 ```bash
 roslaunch roborts_bringup trial.launch
-```
-
-and launch armor detection debugging interface by
-```bash
-rosrun roborts_detection armor_detection_client
 ```
 
 ## Introduction

@@ -17,6 +17,9 @@
 
 #include <unistd.h>
 #include "armor_detection_node.h"
+#include <actionlib/client/simple_action_client.h>
+#include "roborts_msgs/ArmorDetectionAction.h"
+#include <actionlib/client/terminal_state.h>
 
 namespace roborts_detection
 {
@@ -271,6 +274,13 @@ int main(int argc, char **argv)
     roborts_detection::ArmorDetectionNode armor_detection;
     ros::AsyncSpinner async_spinner(1);
     async_spinner.start();
+
+    // Automatically start detection (for trial match)
+    actionlib::SimpleActionClient<roborts_msgs::ArmorDetectionAction> ac("armor_detection_node_action", true);
+    roborts_msgs::ArmorDetectionGoal goal;
+    goal.command = 1;
+    ac.sendGoal(goal);
+
     ros::waitForShutdown();
     armor_detection.StopThread();
     return 0;
